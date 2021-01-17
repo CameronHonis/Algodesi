@@ -63,29 +63,29 @@ export class BST extends DS {
         }
     }
 
-    BFT() {
-        let node: Node = this.root
-        if (!node) {
-            return
-        } else {
-            let queue: Node[] = [node]
-            let pointer: number = 0;
+    // BFT() {
+    //     let node: Node = this.root
+    //     if (!node) {
+    //         return
+    //     } else {
+    //         let queue: Node[] = [node]
+    //         let pointer: number = 0;
 
-            while (pointer < queue.length - 1) {
-                let item: Node = queue[pointer]
-                let value: number = item.value
-                console.log(value) // prints BFT value 
+    //         while (pointer < queue.length - 1) {
+    //             let item: Node = queue[pointer]
+    //             let value: number = item.value
+    //             console.log(value) // prints BFT value 
 
-                if (item.left) {
-                    queue.push(item.left)
-                }
-                if (item.right) {
-                    queue.push(item.right)
-                }
-                pointer++
-            }
-        }
-    }
+    //             if (item.left) {
+    //                 queue.push(item.left)
+    //             }
+    //             if (item.right) {
+    //                 queue.push(item.right)
+    //             }
+    //             pointer++
+    //         }
+    //     }
+    // }
 
     BFS(callback: (node: Node) => boolean, stopAtFirst?: boolean): Node[] | null {
         const rtn: Node[] = [];
