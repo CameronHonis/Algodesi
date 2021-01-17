@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 
-import { V2 } from "./models/V2";
 import { DS } from "./models/DS";
 import { Window } from "./Window";
 
@@ -15,16 +14,12 @@ export const initRefs: Refs = {
 
 export interface State {
   window: {
-    pos: V2;
-    size: V2;
     components: DS[];
   }
 }
 
 export const initState: State = {
   window: {
-    pos: new V2(0, 0),
-    size: new V2(20, 20),
     components: []
   },
 }

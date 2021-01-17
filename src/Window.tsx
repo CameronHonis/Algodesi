@@ -65,7 +65,7 @@ export const Window: React.FC = () => {
     })
   }, []) //eslint-disable-line
 
-  const renderPositions = () => {
+  const renderPositions = (): void => {
     const pos: V2 = refs.current.pos;
     const size: V2 = refs.current.size;
     if (square.current) {
@@ -78,7 +78,7 @@ export const Window: React.FC = () => {
     }
   }
 
-  const renderSizes = () => {
+  const renderSizes = (): void => {
     const size: V2 = refs.current.size;
     if (square.current) {
       const squareSize: V2 = new V2(1000 / size.x, 1000 / size.y);
@@ -87,15 +87,13 @@ export const Window: React.FC = () => {
     }
   }
 
-  const initWindowTween = () => {
+  const initWindowTween = (): void => {
     const windowTween = (lastPos: V2, lastSize: V2): void => {
-      console.log("A");
       refs.current.isTweeningWindow = true
       const [ newSize, sizeMet ] = lastSize.tween(refs.current.targetSize, .15, .001*refs.current.targetSize.x);
       const [ newPos, posMet ] = lastPos.tween(refs.current.targetPos, .15, .001 * newSize.x);
       setTimeout(() => {
         setRefs(RefsAction.setSizePos, {size: newSize, pos: newPos});
-        //setAppState({...appState, window: {...appState.window, pos: newPos, size: newSize}});
         if (sizeMet && posMet) { refs.current.isTweeningWindow = false; return; }
         windowTween(newPos, newSize);
       }, 10);
@@ -103,7 +101,7 @@ export const Window: React.FC = () => {
     windowTween(refs.current.pos, refs.current.size);
   }
 
-  const mouseMove = (e: React.MouseEvent) => {
+  const mouseMove = (e: React.MouseEvent): void => {
     if (e.buttons === 1) {
       setRefs(RefsAction.setTargetPos, {pos: refs.current.targetPos.add(
         e.movementX / window.innerWidth * refs.current.targetSize.x,
