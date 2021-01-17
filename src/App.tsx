@@ -1,28 +1,31 @@
-import React from "react";
-import { V2 } from "./Models";
+import React, { useEffect } from "react";
 
+import { V2 } from "./models/V2";
+import { DS } from "./models/DS";
 import { Window } from "./Window";
 
 
 export interface Refs {
-  test: string;
+  keysDown: Set<string>;
 }
 
 export const initRefs: Refs = {
-  test: "asdf"
-}
-
-export interface WindowState {
-  winPos: V2;
+  keysDown: new Set(),
 }
 
 export interface State {
-  windowState: WindowState;
+  window: {
+    pos: V2;
+    size: V2;
+    components: DS[];
+  }
 }
 
 export const initState: State = {
-  windowState: {
-    winPos: new V2(9.8,0),
+  window: {
+    pos: new V2(0, 0),
+    size: new V2(20, 20),
+    components: []
   },
 }
 
@@ -37,6 +40,30 @@ export const AppContext = React.createContext<AppContextType>({refs: initRefs, s
 export const App: React.FC = () => {
   const refs = React.useRef<Refs>(initRefs);
   const [ state, setState ] = React.useState<State>(initState);
+
+  const keysUpdated = () => {
+    if (refs.current.keysDown.has("q") || refs.current.keysDown.has("Q")) {
+      if (refs.current.keysDown.has("Shift") || refs.current.keysDown.has("Ctrl")) {
+        console.log("appState: ", state)
+        console.log("appRefs: ", refs.current)
+      }
+      refs.current.keysDown.delete("q");
+      refs.current.keysDown.delete("Q");
+      refs.current.keysDown.delete("Shift");
+      refs.current.keysDown.delete("Ctrl");
+      debugger;
+    }
+  }
+  useEffect(() => {
+    document.addEventListener("keydown", e => {
+      refs.current.keysDown.add(e.key);
+      keysUpdated();
+    })
+    document.addEventListener("keyup", e => {
+      refs.current.keysDown.delete(e.key);
+      keysUpdated();
+    })
+  }, []); //eslint-disable-line
   return (
     <div className="App">
       <AppContext.Provider value={{refs: refs.current, state, setState}}>

@@ -1,0 +1,149 @@
+export class V2 {
+  public x: number = 0;
+  public y: number = 0;
+
+  constructor(x: number, y: number)
+  constructor(x: string, y: string)
+  constructor(xy: [number, number])
+  constructor(xy: [string, string])
+  constructor(v2: V2)
+  constructor(first: any, second?: any) {
+    if (typeof(first) === "number" && typeof(second) === "number") {
+      this.x = first;
+      this.y = second;
+    } else if (typeof(first) === "string" && typeof(second) === "string") {
+      this.x = parseInt(first);
+      this.y = parseInt(second);
+    } else if (first instanceof Array && typeof(first[0]) === "number" && typeof(first[1]) === "number") {
+      this.x = first[0];
+      this.y = first[1];
+    } else if (first instanceof Array && typeof(first[0]) === "string" && typeof(first[1]) === "string") {
+      this.x = parseInt(first[0]);
+      this.y = parseInt(first[1]);
+    } else if (first instanceof V2) {
+      this.x = first.x;
+      this.y = first.y;
+    } else {
+      throw new Error("Unhandled parameter types: " + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.constructor");
+    }
+  }
+
+  add(x: number, y: number): V2
+  add(x: string, y: string): V2
+  add(xy: [number, number]): V2
+  add(xy: [string, string]): V2
+  add(v2: V2): V2
+  add(first: any, second?: any): V2 {
+    if (typeof(first) === "number" && typeof(second) === "number") {
+      return new V2(this.x + first, this.y + second);
+    } else if (typeof(first) === "string" && typeof(second) === "string") {
+      return new V2(this.x + parseInt(first), this.y + parseInt(second));
+    } else if (first instanceof Array && typeof(first[0]) === "number" && typeof(first[1]) === "number") {
+      return new V2(this.x + first[0], this.y + first[1]);
+    } else if (first instanceof Array && typeof(first[0]) === "string" && typeof(first[1]) === "string") {
+      return new V2(this.x + parseInt(first[0]), this.y + parseInt(first[1]));
+    } else if (first instanceof V2) {
+      return new V2(this.x + first.x, this.y + first.y);
+    } else {
+      throw new Error("Unhandled parameter types: " + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.add");
+    }
+  }
+
+  scale(coeff: number): V2 {
+    return new V2(coeff * this.x, coeff * this.y);
+  }
+
+  unit(): V2 {
+    const coeff: number = 1 / this.magnitude();
+    if (coeff === Infinity || coeff === -Infinity) {
+      throw new Error("V2.unit cannot calculate unit of vector with magnitude of 0");
+    }
+    return new V2(coeff * this.x, coeff * this.y);
+  }
+
+  magnitude(): number {
+    return Math.sqrt(Math.pow(this.x,2) + Math.pow(this.y,2));
+  }
+
+  sign(): V2 {
+    return new V2(Math.sign(this.x), Math.sign(this.y));
+  }
+
+  originAngle(): number
+  originAngle(lowerBound: number = 0): number { // minimum angle between vector and positive x-axis above the lower bound
+    return (Math.atan(this.y/this.x) + 2*Math.PI) % Math.PI + lowerBound;
+  }
+
+  angleBetween(v2: V2) {
+    const angleOne: number = this.originAngle();
+    const angleTwo: number = v2.originAngle();
+    return Math.min((angleOne - angleTwo) % (2*Math.PI), (angleTwo - angleOne) % (2*Math.PI));
+  }
+
+  dot(v2: V2): number
+  dot(x: number, y: number): number
+  dot(x: string, y: string): number
+  dot(xy: [number, number]): number
+  dot(xy: [string, string]): number
+  dot(first: any, second?: any): number {
+    let dotV2: V2;
+    try {
+      dotV2 = new V2(first, second);
+    } catch { 
+      throw new Error ("Error constructing second V2, unhandled parameter types: " 
+      + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.dot");
+    }
+    return this.magnitude() * dotV2.magnitude() * Math.cos(this.angleBetween(dotV2));
+  }
+
+  parallelProduct(v2: V2): V2
+  parallelProduct(x: number, y: number): V2
+  parallelProduct(x: string, y: string): V2
+  parallelProduct(xy: [number, number]): V2
+  parallelProduct(xy: [string, string]): V2
+  parallelProduct(first: any, second?: any): V2 { // multiplies vector x's and y's as columns. [a,b].parallelProduct([c,d]) => [ac,bd]
+    let dotV2: V2;
+    try {
+      dotV2 = new V2(first, second);
+    } catch {
+      throw new Error ("Error constructing second V2, unhandled parameter types: "
+      + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.dot");
+    }
+    return new V2(this.x * dotV2.x, this.y * dotV2.y);
+  }
+
+  tween(target: V2, c0: number, c1: number): [V2, boolean] {
+    let targetMet: boolean = true;
+    const diff: V2 = target.add(this.scale(-1));
+    let offset: V2 = diff.scale(c0).add(diff.sign().parallelProduct(c1, c1));
+    const postOffsetDiff: V2 = target.add(this.add(offset).scale(-1));
+    if (Math.sign(postOffsetDiff.x) !== Math.sign(diff.x)) {
+      offset = offset.add(postOffsetDiff.x, 0);
+    } else {
+      targetMet = false;
+    }
+    if (Math.sign(postOffsetDiff.y) !== Math.sign(diff.y)) {
+      offset = offset.add(0, postOffsetDiff.y);
+    } else {
+      targetMet = false;
+    }
+    return [this.add(offset), targetMet];
+  }
+
+  toString(sigFigs: number = 4, sciNotation: boolean = false): string {
+    sigFigs = Math.max(sigFigs, 1);
+    const coeff: number = Math.pow(10, sigFigs-1);
+    const xPow10: number = this.x ? -Math.ceil(Math.log10(Math.abs(1/this.x))) : 0;
+    const yPow10: number = this.y ? -Math.ceil(Math.log10(Math.abs(1/this.y))) : 0;
+    const xRound: number = Math.round(coeff*Math.pow(10, -xPow10)*this.x)/coeff;
+    const yRound: number = Math.round(coeff*Math.pow(10, -yPow10)*this.y)/coeff;
+    if (sciNotation) {
+      return "[" + xRound + (xPow10 ? "E" + xPow10 : "") + ", " + yRound + (yPow10 ? "E" + yPow10 : "") + "]";
+    } else {
+      const xStrSize: number = Math.max(sigFigs + xPow10 + Math.max(-Math.sign(xRound),0), sigFigs - xPow10 + 1 + Math.max(-Math.sign(xRound),0), sigFigs + 1);
+      const yStrSize: number = Math.max(sigFigs + yPow10 + Math.max(-Math.sign(yRound),0), sigFigs - yPow10 + 1 + Math.max(-Math.sign(yRound),0), sigFigs + 1);
+      return "[" + (xRound*Math.pow(10, xPow10)).toString().slice(0, xStrSize) 
+        + ", " + (yRound*Math.pow(10, yPow10)).toString().slice(0, yStrSize) + "]";
+    }
+  }
+}

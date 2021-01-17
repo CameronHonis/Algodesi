@@ -7,9 +7,3 @@ ReactDOM.render(
   <App />,
   document.getElementById('root')
 );
-
-document.addEventListener("keyup", e => {
-  if (e.key.toLowerCase() === "q") {
-    debugger;
-  }
-})
