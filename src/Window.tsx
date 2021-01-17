@@ -4,32 +4,74 @@ import { AppContext, AppContextType } from "./App"
 import { V2 } from "./models/V2";
 
 export interface Refs {
+  pos: V2;
+  size: V2;
   targetPos: V2;
-  isPosTweening: boolean;
   targetSize: V2;
   isTweeningWindow: boolean;
-  isSizeTweening: boolean;
 }
 
 export const initRefs: Refs = {
+  pos: new V2(0, 0),
+  size: new V2(20, 20),
   targetPos: new V2(0, 0),
-  isPosTweening: false,
   targetSize: new V2(20, 20),
   isTweeningWindow: false,
-  isSizeTweening: false
+}
+
+enum RefsAction {
+  setSizePos = "SET_SIZE_POS",
+  setTargetPos = "SET_TARGET_POS",
+  setTargetSize = "SET_TARGET_SIZE"
 }
 
 export const Window: React.FC = () => {
   let { state: appState, setState: setAppState, refs: appRefs } = React.useContext<AppContextType>(AppContext); //eslint-disable-line
 
+  const debugPos = React.useRef<HTMLParagraphElement>(null);
+  const debugSize = React.useRef<HTMLParagraphElement>(null);
+  const debugTargetPos = React.useRef<HTMLParagraphElement>(null);
+  const debugTargetSize = React.useRef<HTMLParagraphElement>(null);
   const square = React.useRef<HTMLDivElement>(null);
   const refs = React.useRef(initRefs);
+  const setRefs = (action: RefsAction, arg: any): any => {
+    if (action === RefsAction.setSizePos && arg && arg.pos && arg.size) {
+      refs.current.pos = arg.pos;
+      refs.current.size = arg.size;
+      renderPositions();
+      renderSizes();
+      if (debugPos.current && debugSize.current) {
+        debugPos.current.textContent = "pos: " + refs.current.pos.toString();
+        debugSize.current.textContent = "size: " + refs.current.size.toString();
+      }
+    } else if (action === RefsAction.setTargetPos && arg && arg.pos) {
+      refs.current.targetPos = arg.pos;
+      initWindowTween();
+      if (debugTargetPos.current) {
+        debugTargetPos.current.textContent = "targetPos: " + refs.current.targetPos.toString();
+      }
+    } else if (action === RefsAction.setTargetSize && arg && arg.size) {
+      refs.current.targetSize = arg.size;
+      initWindowTween();
+      if (debugTargetSize.current) {
+        debugTargetSize.current.textContent = "targetSize: " + refs.current.targetSize.toString();
+      }
+    }
+  }
+
+  React.useEffect(() => {
+    document.addEventListener("wheel", e => {
+      setRefs(RefsAction.setTargetSize, {size: refs.current.targetSize.add(e.deltaY/1000*refs.current.targetSize.x, e.deltaY/1000*refs.current.targetSize.y)});
+    })
+  }, []) //eslint-disable-line
 
   const renderPositions = () => {
+    const pos: V2 = refs.current.pos;
+    const size: V2 = refs.current.size;
     if (square.current) {
       const squarePos: V2 = new V2(
-        (appState.window.pos.x + appState.window.size.x/2) / appState.window.size.x * 100,
-        (appState.window.pos.y + appState.window.size.y/2) / appState.window.size.y * 100
+        (pos.x + size.x/2) / size.x * 100,
+        (pos.y + size.y/2) / size.y * 100
       )
       square.current.style.left = squarePos.x + "vw";
       square.current.style.top = squarePos.y + "vh";
@@ -37,49 +79,36 @@ export const Window: React.FC = () => {
   }
 
   const renderSizes = () => {
+    const size: V2 = refs.current.size;
     if (square.current) {
-      const squareSize: V2 = new V2(1000 / appState.window.size.x, 1000 / appState.window.size.y);
+      const squareSize: V2 = new V2(1000 / size.x, 1000 / size.y);
       square.current.style.width = squareSize.x + "px";
       square.current.style.height = squareSize.y + "px";
     }
   }
 
-  React.useEffect(() => {
-    renderPositions();
-  }, [appState.window.pos]); //eslint-disable-line
-
-  React.useEffect(() => {
-    renderSizes();
-  }, [appState.window.size]); // eslint-disable-line
-
-  React.useEffect(() => {
-    document.addEventListener("wheel", e => {
-      refs.current.targetSize = refs.current.targetSize.add(e.deltaY/1000*refs.current.targetSize.x, e.deltaY/1000*refs.current.targetSize.y);
-      initWindowTween();
-    })
-  }, []) //eslint-disable-line
-
   const initWindowTween = () => {
     const windowTween = (lastPos: V2, lastSize: V2): void => {
+      console.log("A");
       refs.current.isTweeningWindow = true
       const [ newSize, sizeMet ] = lastSize.tween(refs.current.targetSize, .15, .001*refs.current.targetSize.x);
       const [ newPos, posMet ] = lastPos.tween(refs.current.targetPos, .15, .001 * newSize.x);
       setTimeout(() => {
-        setAppState({...appState, window: {...appState.window, pos: newPos, size: newSize}});
+        setRefs(RefsAction.setSizePos, {size: newSize, pos: newPos});
+        //setAppState({...appState, window: {...appState.window, pos: newPos, size: newSize}});
         if (sizeMet && posMet) { refs.current.isTweeningWindow = false; return; }
         windowTween(newPos, newSize);
       }, 10);
     }
-    windowTween(appState.window.pos, appState.window.size);
+    windowTween(refs.current.pos, refs.current.size);
   }
 
   const mouseMove = (e: React.MouseEvent) => {
     if (e.buttons === 1) {
-      refs.current.targetPos = refs.current.targetPos.add(
+      setRefs(RefsAction.setTargetPos, {pos: refs.current.targetPos.add(
         e.movementX / window.innerWidth * refs.current.targetSize.x,
-        e.movementY / window.innerHeight * refs.current.targetSize.y,
-      );
-      initWindowTween();
+        e.movementY / window.innerHeight * refs.current.targetSize.y
+      )});
     }
   }
 
@@ -88,8 +117,10 @@ export const Window: React.FC = () => {
       id="window"
       onMouseMove={e => mouseMove(e)}
     >
-      <p className="noselect" style={{position: "absolute"}} >{"pos: " + appState.window.pos.toString()}</p>
-      <p className="noselect" style={{position: "absolute", top: "20px"}} >{"size: " + appState.window.size.toString()}</p>
+      <p ref={debugPos} className="noselect" style={{position: "absolute"}} >{"pos: " + refs.current.pos.toString()}</p>
+      <p ref={debugSize} className="noselect" style={{position: "absolute", top: "20px"}} >{"size: " + refs.current.size.toString()}</p>
+      <p ref={debugTargetPos} className="noselect" style={{position: "absolute", top: "40px"}} >{"targetPos: " + refs.current.targetPos.toString()}</p>
+      <p ref={debugTargetSize} className="noselect" style={{position: "absolute", top: "60px"}} >{"targetSize: " + refs.current.targetSize.toString()}</p>
       <div id="square" ref={square} style={{position: "absolute", backgroundColor: "white", width: "50px", height: "50px", transform: "translate(-50%, -50%)", WebkitTransform: "translate(-50%, -50%)"}} >
 
       </div>

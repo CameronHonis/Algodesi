@@ -107,27 +107,38 @@ export class V2 {
       dotV2 = new V2(first, second);
     } catch {
       throw new Error ("Error constructing second V2, unhandled parameter types: "
-      + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.dot");
+      + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.parallelProduct");
     }
     return new V2(this.x * dotV2.x, this.y * dotV2.y);
   }
 
   tween(target: V2, c0: number, c1: number): [V2, boolean] {
-    let targetMet: boolean = true;
     const diff: V2 = target.add(this.scale(-1));
     let offset: V2 = diff.scale(c0).add(diff.sign().parallelProduct(c1, c1));
     const postOffsetDiff: V2 = target.add(this.add(offset).scale(-1));
     if (Math.sign(postOffsetDiff.x) !== Math.sign(diff.x)) {
       offset = offset.add(postOffsetDiff.x, 0);
-    } else {
-      targetMet = false;
     }
     if (Math.sign(postOffsetDiff.y) !== Math.sign(diff.y)) {
       offset = offset.add(0, postOffsetDiff.y);
-    } else {
-      targetMet = false;
     }
-    return [this.add(offset), targetMet];
+    return [this.add(offset), this.add(offset).equals(target)];
+  }
+
+  equals(v2: V2): boolean
+  equals(x: number, y: number): boolean
+  equals(x: string, y: string): boolean
+  equals(xy: [number, number]): boolean
+  equals(xy: [string ,string]): boolean
+  equals(first: any, second?: any): boolean {
+    let dotV2: V2;
+    try {
+      dotV2 = new V2(first, second);
+    } catch {
+      throw new Error ("Error constructing second V2, unhandled parameter types: "
+      + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.equals");
+    }
+    return this.x === dotV2.x && this.y === dotV2.y;
   }
 
   toString(sigFigs: number = 4, sciNotation: boolean = false): string {

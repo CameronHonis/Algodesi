@@ -102,7 +102,7 @@ export class BST extends DS {
                     rtn.push(node);
                     if (stopAtFirst) { return rtn; }
                 }
-                console.log(value) // prints BFT value 
+                console.log(value) // prints BFT value
                 if (node.left) {
                     queue.push(node.left)
                 }

@@ -7,3 +7,12 @@ ReactDOM.render(
   <App />,
   document.getElementById('root')
 );
+
+/*
+
+TODO:
+
+
+TAKEAWAYS:
+
+*/
