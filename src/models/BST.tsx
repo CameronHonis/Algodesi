@@ -10,10 +10,6 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
   // read-onlys vvv
   public root?: Node;
   public nodeCount: number = 0;
-  public maxDepth: number = 0;
-  public maxDepthNodes: Node[] = [];
-  public minDepth: number = 0;
-  public minDepthNodes: Node[] = [];
   public balanced: Boolean = true;
 
   constructor(pos: V2, value: number)
@@ -36,59 +32,41 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
 
   insert(node: Node): void
   insert(nodes: Node[]): void
-  insert(...arg: any): void { // handle case of adding to minDepth (set minDepthNodes)
-    let nodes: Node[];
+  insert(...arg: any): void {
+    let nodes: Node[] = [];
     if (arg[0] instanceof Array) {
-      nodes = arg[0];
-    } else {
-      nodes = [arg[0]];
+      for (let n of arg[0]) {
+        const toAdd: Node[] = this.breadthFirstSearch((node: Node, depth: number) => true, false, n) || [];
+        toAdd.forEach(v => nodes.push(v)); // eslint-disable-line
+      }
+    } else if (arg[0] instanceof Node) {
+      nodes = this.breadthFirstSearch((node: Node, depth: number) => true, false, arg[0]) || [];
     }
     for (let node of nodes) {
       if (!this.root) {
         this.root = node;
-        this.maxDepth = 1;
-        this.minDepth = 1;
-        this.minDepthNodes = [node];
         this.nodeCount++;
         node.ds = this;
         return;
       }
       let pointer: Node = this.root;
-      let depth: number = 0;
       while ((node.value < pointer.value && pointer.left) || (node.value >= pointer.value && pointer.right)) {
         if (node.value < pointer.value && pointer.left) {
           pointer = pointer.left;
         } else if (pointer.right) {
           pointer = pointer.right;
         }
-        depth++;
       }
       if (node.value < pointer.value) {
         pointer.addChild(NodeChildCategory.LEFT, node);
       } else {
         pointer.addChild(NodeChildCategory.RIGHT, node);
       }
-      if (depth + 1 > this.maxDepth) {
-        if (depth + 1 > this.maxDepth + 1) {
-          console.warn("Detected fault in maxDepth of " + this.toString() + " during BST.insert");
-        }
-        this.maxDepth = depth + 1;
-        this.maxDepthNodes = [node];
-      } else if (depth + 1 === this.maxDepth) {
-        this.maxDepthNodes.push(node);
-      }
-      if (depth + 1 < this.minDepth) {
-        console.warn("Detected fault in minDepth of " + this.toString() + " during BST.insert");
-        this.minDepth = depth + 1;
-        this.minDepthNodes = [node];
-      } else if (depth + 1 === this.minDepth) {
-        this.minDepthNodes.push(node);
-      }
       this.nodeCount++;
     }
   }
 
-  remove(node: Node): void { // handle case of subbing from maxDepth (set maxDepthNodes)
+  remove(node: Node): void {
     if (node.ds !== this || !this.root) {
       throw new Error("Attempt to remove " + node.toString() + " from an non-inheriting " + this.toString() + " during BST.remove");
     }
@@ -130,10 +108,6 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
     } else {
       if (this.root === node) {
         this.root = undefined;
-        this.minDepth = 0;
-        this.maxDepth = 0;
-        this.minDepthNodes = [];
-        this.maxDepthNodes = [];
         this.nodeCount = 0;
         node.ds = null;
       } else {
@@ -236,14 +210,6 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
 
   }
 
-  updateMinDepth(): void {
-
-  }
-
-  updateMaxDepth(): void {
-
-  }
-
   flatten(node?: Node): number[] {
 
     return [];
@@ -251,12 +217,19 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
 
   // breadthFirstSearch(callback: (node: Node, depth: number) => boolean, stopAtFirst: boolean = true): Node[] | null
   // breadthFirstSearch()
-  breadthFirstSearch(callback: (node: Node, depth: number) => boolean, stopAtFirst: boolean = true): Node[] | null {
+  breadthFirstSearch(callback: (node: Node, depth: number) => boolean, stopAtFirst: boolean = true, origin?: Node): Node[] | null {
     const rtn: Node[] = [];
-    if (!this.root) {
-      return null
+    let queue: [Node, number][];
+    if (!origin) {
+      if (!this.root) {
+        return null
+      }
+      queue = [[this.root, 0]];
+    } else if (origin.ds === this) {
+      queue = [[origin, 0]];
+    } else {
+      return null;
     }
-    let queue: [Node, number][] = [[this.root, 0]];
     let pointer: number = 0;
     while (pointer < queue.length - 1) {
       const [ node, depth ]: [Node, number] = queue[pointer];
@@ -278,12 +251,19 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
     return rtn;
   }
 
-  depthFirstSearch(callback: (node: Node, depth: number) => boolean, stopAtFirst: boolean = true): Node[] | null {
+  depthFirstSearch(callback: (node: Node, depth: number) => boolean, stopAtFirst: boolean = true, origin?: Node): Node[] | null {
     const rtn: Node[] = [];
-    if (!this.root) {
+    let stack: [Node, number][];
+    if (!origin) {
+      if (!this.root) {
+        return null;
+      }
+      stack = [[this.root, 0]];
+    } else if (origin.ds === this) {
+      stack = [[origin, 0]];
+    } else {
       return null;
     }
-    let stack: [Node, number][] = [[this.root, 0]];
     while (stack.length) {
       const [ node, depth ] = stack[stack.length-1];
       if (callback(node, depth)) {
