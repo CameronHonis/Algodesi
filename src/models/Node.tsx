@@ -88,7 +88,7 @@ export class Node {
     return true;
   }
 
-  addChild(childCategory: NodeChildCategory, node: Node): void { //handle node with children attached
+  addChild(childCategory: NodeChildCategory, node: Node): void {
     if (node.left || node.right) { 
       throw new Error("Unable to add " + node.toString() + " with children nodes in BST.addChild");
     }
