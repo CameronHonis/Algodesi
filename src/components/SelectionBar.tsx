@@ -1,19 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { V2 } from '../models/V2'
 import ItemSelection from './ItemSelection'
 
-type MenuState = {
-  isOpen: boolean,
-  isNodeType: boolean,
-  isListType: boolean
+enum GroupSelect {
+  NONE,
+  LIST,
+  NODE,
 }
 
-const initMenuState: MenuState = {
-  isOpen: false,
-  isNodeType: false,
-  isListType: false,
+export interface MenuState {
+  selected: GroupSelect;
 }
 
-const nodeMenuItems: { itemName: string, className: string }[] = [
+export const initMenuState: MenuState = {
+  selected: GroupSelect.NONE,
+}
+
+export interface MenuItem {
+  itemName: string;
+  pos: V2;
+  svg?: JSX.Element;
+  category: Set<GroupSelect>
+}
+
+const itemsByGroup: {[index: GroupSelect]: Set<MenuItem>} = {
+  [GroupSelect.NONE]: new Set(
+    {}
+  )
+}
+
+const menuItems: MenuItem[] = [];
+
+const nodeMenuItems: { itemName: string, className: string, pos: V2}[] = [
   {
     itemName: 'General Tree',
     className: 'itemSelection'
@@ -126,70 +144,37 @@ const SelectionBar: React.FC = () => {
     setMenu(initMenuState)
   }
 
-  return (
-    <div className='itemMenu'>
-      {menu.isNodeType ?
-        <>
-          <div onClick={e => closeDiv(e)}>x</div>
-          <div className='itemSelection'><p>General Tree</p></div>
-          <div className='itemSelection'><p>Binary Search Tree</p></div>
-          <div className='itemSelection'><p>Trie</p></div>
-          <div className='itemSelection'><p>AVL Tree</p></div>
-          <div className='itemSelection'><p>Splay Tree</p></div>
-          <div className='itemSelection'><p>Treap</p></div>
-          <div className='itemSelection'><p>B-tree</p></div>
-          <div className='itemSelection'><p>Acyclic Graph</p></div>
-          <div className='itemSelection'><p>Cyclic Graph</p></div>
-          <div className='itemSelection'><p>Weighted Graph</p></div>
-          <div className='itemSelection'><p>Unweighted Graph</p></div>
-          <div className='itemSelection'><p>Undirected Graph</p></div>
-          <div className='itemSelection'><p>Directed Graph</p></div>
-          <div className='itemSelection'><p>Simple Linked List</p></div>
-          <div className='itemSelection'><p>Doubly Linked List</p></div>
-          <div className='itemSelection'><p>Circular Linked List</p></div>
-        </>
-        :
-        menu.isListType ?
-          <>
-            <div onClick={e => closeDiv(e)}>x</div>
-            <div className='itemSelection'><p>Array</p></div>
-            <div className='itemSelection'><p>Set</p></div>
-            <div className='itemSelection'><p>Stack</p></div>
-            <div className='itemSelection'><p>Queue</p></div>
-          </>
-          :
-          <>
-            <div
-              onClick={e => openDiv(e)}
-              id='nodeType'
-              className='mainSelection'
-            >Graph Node</div>
-            <div
-              onClick={e => openDiv(e)}
-              id='arrayType'
-              className='mainSelection'
-            >List item</div>
-            <div className='mainSelection'><p>pencil</p></div>
-            <div className='mainSelection'><p>eraser</p></div>
-            <div className='mainSelection'><p>input</p></div>
-          </>
-      }
-    </div>
-  )
-
-
   // return (
   //   <div className='itemMenu'>
-  //     <div onClick={e => closeDiv(e)}>x</div>
   //     {menu.isNodeType ?
-  //       nodeMenuItems.map(item => {
-  //         return <ItemSelection itemName={item.itemName} className={item.className}/>
-  //       })
+  //       <>
+  //         <div onClick={e => closeDiv(e)}>x</div>
+  //         <div className='itemSelection'><p>General Tree</p></div>
+  //         <div className='itemSelection'><p>Binary Search Tree</p></div>
+  //         <div className='itemSelection'><p>Trie</p></div>
+  //         <div className='itemSelection'><p>AVL Tree</p></div>
+  //         <div className='itemSelection'><p>Splay Tree</p></div>
+  //         <div className='itemSelection'><p>Treap</p></div>
+  //         <div className='itemSelection'><p>B-tree</p></div>
+  //         <div className='itemSelection'><p>Acyclic Graph</p></div>
+  //         <div className='itemSelection'><p>Cyclic Graph</p></div>
+  //         <div className='itemSelection'><p>Weighted Graph</p></div>
+  //         <div className='itemSelection'><p>Unweighted Graph</p></div>
+  //         <div className='itemSelection'><p>Undirected Graph</p></div>
+  //         <div className='itemSelection'><p>Directed Graph</p></div>
+  //         <div className='itemSelection'><p>Simple Linked List</p></div>
+  //         <div className='itemSelection'><p>Doubly Linked List</p></div>
+  //         <div className='itemSelection'><p>Circular Linked List</p></div>
+  //       </>
   //       :
   //       menu.isListType ?
-  //       arrayMenuItems.map(item => {
-  //         return <ItemSelection itemName={item.itemName} className={item.className}/>
-  //       })
+  //         <>
+  //           <div onClick={e => closeDiv(e)}>x</div>
+  //           <div className='itemSelection'><p>Array</p></div>
+  //           <div className='itemSelection'><p>Set</p></div>
+  //           <div className='itemSelection'><p>Stack</p></div>
+  //           <div className='itemSelection'><p>Queue</p></div>
+  //         </>
   //         :
   //         <>
   //           <div
@@ -209,6 +194,41 @@ const SelectionBar: React.FC = () => {
   //     }
   //   </div>
   // )
+
+  const items: JSX.Element[] = [];
+  for (let )
+
+  return (
+    <div className='itemMenu'>
+      <div onClick={e => closeDiv(e)}>x</div>
+      {menu.isNodeType ?
+        nodeMenuItems.map(item => {
+          return <ItemSelection itemName={item.itemName} className={item.className}/>
+        })
+        :
+        menu.isListType ?
+        arrayMenuItems.map(item => {
+          return <ItemSelection itemName={item.itemName} className={item.className}/>
+        })
+          :
+          <>
+            <div
+              onClick={e => openDiv(e)}
+              id='nodeType'
+              className='mainSelection'
+            >Graph Node</div>
+            <div
+              onClick={e => openDiv(e)}
+              id='arrayType'
+              className='mainSelection'
+            >List item</div>
+            <div className='mainSelection'><p>pencil</p></div>
+            <div className='mainSelection'><p>eraser</p></div>
+            <div className='mainSelection'><p>input</p></div>
+          </>
+      }
+    </div>
+  )
 
 }
 
