@@ -3,6 +3,8 @@ import React from "react";
 import { AppContext, AppContextType } from "./App"
 import { V2 } from "./models/V2";
 
+import SelectionBar from './components/SelectionBar'
+
 export interface Refs {
   pos: V2;
   size: V2;
@@ -120,8 +122,8 @@ export const Window: React.FC = () => {
       <p ref={debugTargetPos} className="noselect" style={{position: "absolute", top: "40px"}} >{"targetPos: " + refs.current.targetPos.toString()}</p>
       <p ref={debugTargetSize} className="noselect" style={{position: "absolute", top: "60px"}} >{"targetSize: " + refs.current.targetSize.toString()}</p>
       <div id="square" ref={square} style={{position: "absolute", backgroundColor: "white", width: "50px", height: "50px", transform: "translate(-50%, -50%)", WebkitTransform: "translate(-50%, -50%)"}} >
-
       </div>
+      <SelectionBar/>
     </div>
   )
 }
