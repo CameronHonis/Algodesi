@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
+import { BST } from "./models/BST";
 
 import { DS } from "./models/DS";
+import { V2 } from "./models/V2";
 import { Window } from "./Window";
 
 
@@ -20,7 +22,10 @@ export interface State {
 
 export const initState: State = {
   window: {
-    components: []
+    components: [
+      new BST([1,2,3], new V2(0, 0)),
+      new BST([4,5,6], new V2(5,0))
+    ]
   },
 }
 
