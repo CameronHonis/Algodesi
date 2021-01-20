@@ -7,24 +7,24 @@ export class V2 {
   constructor(xy: [number, number])
   constructor(xy: [string, string])
   constructor(v2: V2)
-  constructor(first: any, second?: any) {
-    if (typeof(first) === "number" && typeof(second) === "number") {
-      this.x = first;
-      this.y = second;
-    } else if (typeof(first) === "string" && typeof(second) === "string") {
-      this.x = parseInt(first);
-      this.y = parseInt(second);
-    } else if (first instanceof Array && typeof(first[0]) === "number" && typeof(first[1]) === "number") {
-      this.x = first[0];
-      this.y = first[1];
-    } else if (first instanceof Array && typeof(first[0]) === "string" && typeof(first[1]) === "string") {
-      this.x = parseInt(first[0]);
-      this.y = parseInt(first[1]);
-    } else if (first instanceof V2) {
-      this.x = first.x;
-      this.y = first.y;
+  constructor(...arg: any) {
+    if (typeof(arg[0]) === "number" && typeof(arg[1]) === "number") {
+      this.x = arg[0];
+      this.y = arg[1];
+    } else if (typeof(arg[0]) === "string" && typeof(arg[1]) === "string") {
+      this.x = parseInt(arg[0]);
+      this.y = parseInt(arg[1]);
+    } else if (arg[0] instanceof Array && typeof(arg[0][0]) === "number" && typeof(arg[0][1]) === "number") {
+      this.x = arg[0][0];
+      this.y = arg[0][1];
+    } else if (arg[0] instanceof Array && typeof(arg[0][0]) === "string" && typeof(arg[0][1]) === "string") {
+      this.x = parseInt(arg[0][0]);
+      this.y = parseInt(arg[0][1]);
+    } else if (arg[0] instanceof V2) {
+      this.x = arg[0].x;
+      this.y = arg[0].y;
     } else {
-      throw new Error("Unhandled parameter types: " + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.constructor");
+      throw new Error("Unhandled parameter types: " + typeof(arg[0]) + (arg[1] ? ", " + typeof(arg[1]) : "") + " for V2.constructor");
     }
   }
 
@@ -33,19 +33,19 @@ export class V2 {
   add(xy: [number, number]): V2
   add(xy: [string, string]): V2
   add(v2: V2): V2
-  add(first: any, second?: any): V2 {
-    if (typeof(first) === "number" && typeof(second) === "number") {
-      return new V2(this.x + first, this.y + second);
-    } else if (typeof(first) === "string" && typeof(second) === "string") {
-      return new V2(this.x + parseInt(first), this.y + parseInt(second));
-    } else if (first instanceof Array && typeof(first[0]) === "number" && typeof(first[1]) === "number") {
-      return new V2(this.x + first[0], this.y + first[1]);
-    } else if (first instanceof Array && typeof(first[0]) === "string" && typeof(first[1]) === "string") {
-      return new V2(this.x + parseInt(first[0]), this.y + parseInt(first[1]));
-    } else if (first instanceof V2) {
-      return new V2(this.x + first.x, this.y + first.y);
+  add(...arg: any): V2 {
+    if (typeof(arg[0]) === "number" && typeof(arg[1]) === "number") {
+      return new V2(this.x + arg[0], this.y + arg[1]);
+    } else if (typeof(arg[0]) === "string" && typeof(arg[1]) === "string") {
+      return new V2(this.x + parseInt(arg[0]), this.y + parseInt(arg[1]));
+    } else if (arg[0] instanceof Array && typeof(arg[0][0]) === "number" && typeof(arg[0][1]) === "number") {
+      return new V2(this.x + arg[0][0], this.y + arg[0][1]);
+    } else if (arg[0] instanceof Array && typeof(arg[0][0]) === "string" && typeof(arg[0][1]) === "string") {
+      return new V2(this.x + parseInt(arg[0][0]), this.y + parseInt(arg[0][1]));
+    } else if (arg[0] instanceof V2) {
+      return new V2(this.x + arg[0].x, this.y + arg[0].y);
     } else {
-      throw new Error("Unhandled parameter types: " + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.add");
+      throw new Error("Unhandled parameter types: " + typeof(arg[0]) + (arg[1] ? ", " + typeof(arg[1]) : "") + " for V2.add");
     }
   }
 
@@ -69,7 +69,6 @@ export class V2 {
     return new V2(Math.sign(this.x), Math.sign(this.y));
   }
 
-  originAngle(): number
   originAngle(lowerBound: number = 0): number { // minimum angle between vector and positive x-axis above the lower bound
     return (Math.atan(this.y/this.x) + 2*Math.PI) % Math.PI + lowerBound;
   }
@@ -85,13 +84,13 @@ export class V2 {
   dot(x: string, y: string): number
   dot(xy: [number, number]): number
   dot(xy: [string, string]): number
-  dot(first: any, second?: any): number {
+  dot(...arg: any): number {
     let dotV2: V2;
     try {
-      dotV2 = new V2(first, second);
+      dotV2 = new V2(arg[0], arg[1]);
     } catch { 
-      throw new Error ("Error constructing second V2, unhandled parameter types: " 
-      + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.dot");
+      throw new Error ("Error constructing arg[1] V2, unhandled parameter types: " 
+      + typeof(arg[0]) + (arg[1] ? ", " + typeof(arg[1]) : "") + " for V2.dot");
     }
     return this.magnitude() * dotV2.magnitude() * Math.cos(this.angleBetween(dotV2));
   }
@@ -101,13 +100,13 @@ export class V2 {
   parallelProduct(x: string, y: string): V2
   parallelProduct(xy: [number, number]): V2
   parallelProduct(xy: [string, string]): V2
-  parallelProduct(first: any, second?: any): V2 { // multiplies vector x's and y's as columns. [a,b].parallelProduct([c,d]) => [ac,bd]
+  parallelProduct(...arg: any): V2 { // multiplies vector x's and y's as columns. [a,b].parallelProduct([c,d]) => [ac,bd]
     let dotV2: V2;
     try {
-      dotV2 = new V2(first, second);
+      dotV2 = new V2(arg[0], arg[1]);
     } catch {
-      throw new Error ("Error constructing second V2, unhandled parameter types: "
-      + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.parallelProduct");
+      throw new Error ("Error constructing arg[1] V2, unhandled parameter types: "
+      + typeof(arg[0]) + (arg[1] ? ", " + typeof(arg[1]) : "") + " for V2.parallelProduct");
     }
     return new V2(this.x * dotV2.x, this.y * dotV2.y);
   }
@@ -130,13 +129,13 @@ export class V2 {
   equals(x: string, y: string): boolean
   equals(xy: [number, number]): boolean
   equals(xy: [string ,string]): boolean
-  equals(first: any, second?: any): boolean {
+  equals(...arg: any): boolean {
     let dotV2: V2;
     try {
-      dotV2 = new V2(first, second);
+      dotV2 = new V2(arg[0], arg[1]);
     } catch {
-      throw new Error ("Error constructing second V2, unhandled parameter types: "
-      + typeof(first) + (second ? ", " + typeof(second) : "") + " for V2.equals");
+      throw new Error ("Error constructing arg[1] V2, unhandled parameter types: "
+      + typeof(arg[0]) + (arg[1] ? ", " + typeof(arg[1]) : "") + " for V2.equals");
     }
     return this.x === dotV2.x && this.y === dotV2.y;
   }
