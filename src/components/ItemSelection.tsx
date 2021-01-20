@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React from 'react'
 
 type ItemSelectionProps = {
   itemName: string,
@@ -7,9 +7,9 @@ type ItemSelectionProps = {
 
 const ItemSelection: React.FC<ItemSelectionProps> = (props) => {
   const { itemName, className } = props
-  const [classList, setClassList] = useState('itemSelection')
+  const [classList, setClassList] = React.useState('itemSelection')
 
-  useEffect(() => {
+  React.useEffect(() => {
       setClassList('itemSelection itemSelectionLoaded')
   }, [])
   
