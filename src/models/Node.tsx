@@ -89,11 +89,14 @@ export class Node {
   }
 
   addChild(childCategory: NodeChildCategory, node: Node): void { //handle node with children attached
+    if (node.left || node.right) { 
+      throw new Error("Unable to add " + node.toString() + " with children nodes in BST.addChild");
+    }
     if (childCategory === NodeChildCategory.LEFT) {
-      if (this.left) throw new Error("Unable to push node " + node.toString() + ". Left node already exists on " + this.toString() + " for Node.addChild(LEFT)");
-      if (node.value >= this.value) throw new Error("Cannot push node of greater/equal value to " + this.toString() + " for Node.addChild(LEFT)");
-      if (this.children.length > 0) console.warn("inconsistent children categories on " + this.toString() + " for Node.addChild(LEFT)");
-      if (node.parent) console.warn("Forced parent override of " + this.toString() + " for Node.addChild(LEFT)");
+      if (this.left) throw new Error("Unable to push node " + node.toString() + ". Left node already exists on " + this.toString() + " for Node.addChild");
+      if (node.value >= this.value) throw new Error("Cannot push node of greater/equal value to " + this.toString() + " for Node.addChild");
+      if (this.children.length > 0) console.warn("inconsistent children categories on " + this.toString() + " for Node.addChild");
+      if (node.parent) console.warn("Forced parent override of " + this.toString() + " for Node.addChild");
       node.removeParent();
       node.parent = this;
       node.ds = this.ds;

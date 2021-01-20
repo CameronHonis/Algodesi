@@ -91,7 +91,7 @@ export const Window: React.FC = () => {
     const windowTween = (lastPos: V2, lastSize: V2): void => {
       refs.current.isTweeningWindow = true
       const [ newSize, sizeMet ] = lastSize.tween(refs.current.targetSize, .15, .001*refs.current.targetSize.x);
-      const [ newPos, posMet ] = lastPos.tween(refs.current.targetPos, .15, .001 * newSize.x);
+      const [ newPos, posMet ] = lastPos.tween(refs.current.targetPos, .5, .001*newSize.x);
       setTimeout(() => {
         setRefs(RefsAction.setSizePos, {size: newSize, pos: newPos});
         if (sizeMet && posMet) { refs.current.isTweeningWindow = false; return; }

@@ -19,22 +19,4 @@ export abstract class DS {
     this.boxTopLeft = pos.add(this.size.scale(-.5));
     this.boxBottomRight = pos.add(this.size.scale(.5));
   }
-
-  // Getters
-  getId(): number {
-    return this.id;
-  }
-
-  getSize(): V2 {
-    return this.size;
-  }
-
-  getBoxTopLeft(): V2 {
-    return this.boxTopLeft;
-  }
-
-  getBoxBottomRight(): V2 {
-    return this.boxBottomRight;
-  }
-
 }

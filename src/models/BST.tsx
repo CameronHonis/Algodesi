@@ -237,7 +237,7 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
   }
 
   updateMinDepth(): void {
-    
+
   }
 
   updateMaxDepth(): void {
@@ -249,7 +249,9 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
     return [];
   }
 
-  bredthFirstSearch(callback: (node: Node, depth: number) => boolean, stopAtFirst: boolean = true): Node[] | null {
+  // breadthFirstSearch(callback: (node: Node, depth: number) => boolean, stopAtFirst: boolean = true): Node[] | null
+  // breadthFirstSearch()
+  breadthFirstSearch(callback: (node: Node, depth: number) => boolean, stopAtFirst: boolean = true): Node[] | null {
     const rtn: Node[] = [];
     if (!this.root) {
       return null
@@ -309,7 +311,7 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
       rtn += "root: " + this.root.toString();
       addedFields.add("root");
     } else {
-      rtn += "id: " + this.getId();
+      rtn += "id: " + this.id;
       addedFields.add("id");
     }
     if (fields) {

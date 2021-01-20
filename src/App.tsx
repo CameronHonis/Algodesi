@@ -22,10 +22,10 @@ export interface State {
 
 export const initState: State = {
   window: {
-    components: [
-      new BST([1,2,3], new V2(0, 0)),
-      new BST([4,5,6], new V2(5,0))
-    ]
+    components: []
+    //   new BST([1,2,3], new V2(0, 0)),
+    //   new BST([4,5,6], new V2(5,0))
+    // ]
   },
 }
 
@@ -54,6 +54,11 @@ export const App: React.FC = () => {
       debugger;
     }
   }
+
+  const setKeyRefs = () => {
+
+  }
+
   useEffect(() => {
     document.addEventListener("keydown", e => {
       refs.current.keysDown.add(e.key);
