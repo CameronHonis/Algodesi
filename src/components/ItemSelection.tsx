@@ -6,15 +6,10 @@ type ItemSelectionProps = {
 }
 
 const ItemSelection: React.FC<ItemSelectionProps> = (props) => {
-  const { itemName, className } = props
-  const [classList, setClassList] = React.useState('itemSelection')
+  const { itemName } = props
 
-  React.useEffect(() => {
-      setClassList('itemSelection itemSelectionLoaded')
-  }, [])
-  
   return (
-    <div className={classList}>
+    <div className='itemSelection'>
       <p>{itemName}</p>
     </div>
   )

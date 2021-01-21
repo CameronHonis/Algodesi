@@ -8,228 +8,287 @@ enum GroupSelect {
   NODE,
 }
 
-export interface MenuState {
-  selected: GroupSelect;
-}
-
-export const initMenuState: MenuState = {
-  selected: GroupSelect.NONE,
-}
-
+type GroupSelectKeys = keyof typeof GroupSelect
 export interface MenuItem {
   itemName: string;
   pos: V2;
-  svg?: JSX.Element;
-  category: Set<GroupSelect>
+  svg?: JSX.Element | null;
+  category: GroupSelect
 }
 
-const itemsByGroup: {[index: GroupSelect]: Set<MenuItem>} = {
-  [GroupSelect.NONE]: new Set(
-    {}
-  )
+const itemsByGroup: { [key in GroupSelectKeys]: MenuItem[] } = {
+  NONE:
+  [
+    {
+      itemName: 'Graph Node',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NONE,
+    },
+    {
+      itemName: 'List item',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NONE
+    },
+    {
+      itemName: 'Pencil',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NONE
+    },
+    {
+      itemName: 'Eraser',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NONE
+    },
+    {
+      itemName: 'Input',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NONE
+    },
+  ],
+  LIST:
+  [
+    {
+      itemName: 'Array',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.LIST
+    },
+    {
+      itemName: 'Stack',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.LIST
+    },
+    {
+      itemName: 'Set',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.LIST
+    },
+    {
+      itemName: 'Queue',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.LIST
+    },
+  ],
+  NODE:
+  [
+    {
+      itemName: 'General Tree',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Binary Tree',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Binary Search Tree',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Trie',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'AVL Tree',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Red-black tree',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Splay Tree',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Treap',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'B-tree',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Acyclic Graph',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Cyclic Graph',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Weighted Graph',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Unweighted Graph',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Undirected Graph',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Directed Graph',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Simple Linked List',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Doubly Linked List',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+    {
+      itemName: 'Circular Linked List',
+      pos: new V2(50, 50),
+      svg: null,
+      category: GroupSelect.NODE
+    },
+  ]
+}
+export interface initBarRef {
+  size: V2;
+  targetSize: V2;
+  selected: GroupSelect;
+  rendered: MenuItem[];
+  isTweeningBar: boolean;
 }
 
-const menuItems: MenuItem[] = [];
+export const initBarState: initBarRef = {
+  size: new V2(50, 250),
+  targetSize: new V2(50, 250),
+  selected: GroupSelect.NONE,
+  rendered: itemsByGroup.NONE,
+  isTweeningBar: false,
+}
 
-const nodeMenuItems: { itemName: string, className: string, pos: V2}[] = [
-  {
-    itemName: 'General Tree',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Binary Tree',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Binary Search Tree',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Trie',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'AVL Tree',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Red-black tree',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Splay Tree',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Treap',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'B-tree',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Acyclic Graph',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Cyclic Graph',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Weighted Graph',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Unweighted Graph',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Undirected Graph',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Directed Graph',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Simple Linked List',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Doubly Linked List',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Circular Linked List',
-    className: 'itemSelection'
-  },
-]
+enum BarRefsAction {
+  SET_BAR_SIZE
+}
 
-const arrayMenuItems: { itemName: string, className: string }[] = [
-  {
-    itemName: 'Array',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Stack',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Set',
-    className: 'itemSelection'
-  },
-  {
-    itemName: 'Queue',
-    className: 'itemSelection'
-  },
-]
 
 const SelectionBar: React.FC = () => {
-  const [menu, setMenu] = useState(initMenuState)
+  const barSizeRef = React.useRef<HTMLDivElement>(null);
 
-  const openDiv = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    const target = e.target as HTMLDivElement
-    console.log(target.id)
-    setMenu({
-      isOpen: true,
-      isNodeType: target.id === 'nodeType' ? true : false,
-      isListType: target.id === 'arrayType' ? true : false,
-    })
+  const refs = React.useRef(initBarState);
+
+  const setBarRefs = (action: BarRefsAction, arg: any): any => {
+    if (action === BarRefsAction.SET_BAR_SIZE && arg && arg.size){
+      refs.current.size = arg.size
+      renderBarSize()
+      initBarSizeTween()
+    }
   }
 
-  const closeDiv = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setMenu(initMenuState)
+
+  const renderBarSize = (): void => {
+    const size: V2 = refs.current.size;
+    if (barSizeRef.current) {
+      const barSize: V2 = new V2(50, 50);
+      barSizeRef.current.style.width = barSize.x + "px";
+      barSizeRef.current.style.height = barSize.y + "px";
+    }
   }
 
-  // return (
-  //   <div className='itemMenu'>
-  //     {menu.isNodeType ?
-  //       <>
-  //         <div onClick={e => closeDiv(e)}>x</div>
-  //         <div className='itemSelection'><p>General Tree</p></div>
-  //         <div className='itemSelection'><p>Binary Search Tree</p></div>
-  //         <div className='itemSelection'><p>Trie</p></div>
-  //         <div className='itemSelection'><p>AVL Tree</p></div>
-  //         <div className='itemSelection'><p>Splay Tree</p></div>
-  //         <div className='itemSelection'><p>Treap</p></div>
-  //         <div className='itemSelection'><p>B-tree</p></div>
-  //         <div className='itemSelection'><p>Acyclic Graph</p></div>
-  //         <div className='itemSelection'><p>Cyclic Graph</p></div>
-  //         <div className='itemSelection'><p>Weighted Graph</p></div>
-  //         <div className='itemSelection'><p>Unweighted Graph</p></div>
-  //         <div className='itemSelection'><p>Undirected Graph</p></div>
-  //         <div className='itemSelection'><p>Directed Graph</p></div>
-  //         <div className='itemSelection'><p>Simple Linked List</p></div>
-  //         <div className='itemSelection'><p>Doubly Linked List</p></div>
-  //         <div className='itemSelection'><p>Circular Linked List</p></div>
-  //       </>
-  //       :
-  //       menu.isListType ?
-  //         <>
-  //           <div onClick={e => closeDiv(e)}>x</div>
-  //           <div className='itemSelection'><p>Array</p></div>
-  //           <div className='itemSelection'><p>Set</p></div>
-  //           <div className='itemSelection'><p>Stack</p></div>
-  //           <div className='itemSelection'><p>Queue</p></div>
-  //         </>
-  //         :
-  //         <>
-  //           <div
-  //             onClick={e => openDiv(e)}
-  //             id='nodeType'
-  //             className='mainSelection'
-  //           >Graph Node</div>
-  //           <div
-  //             onClick={e => openDiv(e)}
-  //             id='arrayType'
-  //             className='mainSelection'
-  //           >List item</div>
-  //           <div className='mainSelection'><p>pencil</p></div>
-  //           <div className='mainSelection'><p>eraser</p></div>
-  //           <div className='mainSelection'><p>input</p></div>
-  //         </>
-  //     }
-  //   </div>
-  // )
+  const initBarSizeTween = (): void => {
+    const barSizeTween = (): void => {
+      refs.current.isTweeningBar = true
+      const [newSize, sizeMet] = refs.current.size.tween(refs.current.targetSize, .15, .001 * refs.current.targetSize.x);
+      setTimeout(() => {
+        setBarRefs(BarRefsAction.SET_BAR_SIZE, { size: newSize});
+        if (sizeMet) { refs.current.isTweeningBar = false; return; }
+        barSizeTween();
+      }, 10);
+    }
+    barSizeTween();
+  }
 
-  const items: JSX.Element[] = [];
-  for (let )
+  React.useEffect(() => {
+    setBarRefs(BarRefsAction.SET_BAR_SIZE, {size: refs.current.size});
+  }, [])
 
+  // for (let i = 0; i < )
+  
   return (
-    <div className='itemMenu'>
-      <div onClick={e => closeDiv(e)}>x</div>
-      {menu.isNodeType ?
-        nodeMenuItems.map(item => {
-          return <ItemSelection itemName={item.itemName} className={item.className}/>
-        })
-        :
-        menu.isListType ?
-        arrayMenuItems.map(item => {
-          return <ItemSelection itemName={item.itemName} className={item.className}/>
-        })
-          :
-          <>
-            <div
-              onClick={e => openDiv(e)}
-              id='nodeType'
-              className='mainSelection'
-            >Graph Node</div>
-            <div
-              onClick={e => openDiv(e)}
-              id='arrayType'
-              className='mainSelection'
-            >List item</div>
-            <div className='mainSelection'><p>pencil</p></div>
-            <div className='mainSelection'><p>eraser</p></div>
-            <div className='mainSelection'><p>input</p></div>
-          </>
-      }
+    <div className='itemMenu' ref={barSizeRef}>
+
     </div>
   )
-
+  
 }
 
 export default SelectionBar
+// return (
+//   <div className='itemMenu'>
+//     <div onClick={e => closeDiv(e)}>x</div>
+//     {menu.isNodeType ?
+//       nodeMenuItems.map(item => {
+//         return <ItemSelection itemName={item.itemName} className={item.className}/>
+//       })
+//       :
+//       menu.isListType ?
+//       arrayMenuItems.map(item => {
+//         return <ItemSelection itemName={item.itemName} className={item.className}/>
+//       })
+//         :
+//         <>
+//           <div
+//             onClick={e => openDiv(e)}
+//             id='nodeType'
+//             className='mainSelection'
+//           >Graph Node</div>
+//           <div
+//             onClick={e => openDiv(e)}
+//             id='arrayType'
+//             className='mainSelection'
+//           >List item</div>
+//           <div className='mainSelection'><p>pencil</p></div>
+//           <div className='mainSelection'><p>eraser</p></div>
+//           <div className='mainSelection'><p>input</p></div>
+//         </>
+//     }
+//   </div>
+// )
