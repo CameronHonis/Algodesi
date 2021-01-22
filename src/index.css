@@ -74,7 +74,7 @@ body {
 /* SelectionBar vvv */
 
 .itemMenu {
-  background-color: black;
+  /* background-color: black; */
   margin: 0;
   position: absolute;
   top: 20px;
@@ -86,3 +86,8 @@ body {
 }
 
 
+.itemSelection p {
+  color: white;
+  height: 50px;
+  border: 1px solid white;
+}

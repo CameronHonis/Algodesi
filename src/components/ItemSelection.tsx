@@ -2,14 +2,13 @@ import React from 'react'
 
 type ItemSelectionProps = {
   itemName: string,
-  className: string
 }
 
 const ItemSelection: React.FC<ItemSelectionProps> = (props) => {
   const { itemName } = props
 
   return (
-    <div className='itemSelection'>
+    <div className='itemSelection' id={itemName}>
       <p>{itemName}</p>
     </div>
   )
