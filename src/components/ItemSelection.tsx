@@ -2,19 +2,13 @@ import React from 'react'
 
 type ItemSelectionProps = {
   itemName: string,
-  className: string
 }
 
 const ItemSelection: React.FC<ItemSelectionProps> = (props) => {
-  const { itemName, className } = props
-  const [classList, setClassList] = React.useState('itemSelection')
+  const { itemName } = props
 
-  React.useEffect(() => {
-      setClassList('itemSelection itemSelectionLoaded')
-  }, [])
-  
   return (
-    <div className={classList}>
+    <div className='itemSelection' id={itemName}>
       <p>{itemName}</p>
     </div>
   )

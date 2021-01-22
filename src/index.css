@@ -73,77 +73,21 @@ body {
 /* APP GENERAL ^^^^ */
 /* SelectionBar vvv */
 
-div.mainSelection {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid silver;
-  height: 50px;
-  width: 50px;
-  padding: 5px;
-  transition: all 1s;
-  overflow: hidden;
-  float: right;
-}
 .itemMenu {
-  display: flex;
-  flex-direction: column;
-  background-color: black;
+  /* background-color: black; */
   margin: 0;
-  /* width: 50px; */
   position: absolute;
   top: 20px;
   right: 20px;
   border-radius: 10px;
-  transition: all 2s;
   overflow: hidden;
   z-index: 500;
-  min-height: 200px;
-  min-width: 50px;
   border: 1px solid grey;
 }
-.itemMenu:first-child {
-  border-bottom: 1px solid silver;
-}
 
-div.itemSelection {
-  display: flex;
-  align-items: center;
-  transition: all 1s;
-  width: 200px;
-  height: 50px;
-  padding: 5px;
-  border-bottom: 1px solid silver;
-  overflow-x: hidden;
-  transform-origin: right;
-}
 
-/* div.itemSelectionLoaded {
-  height: 50px;
-  min-width: 50px;
-  width: 200px;
-  padding: 5px;
-  border: 1px solid black;
-  transition: all 0.5s; 
+.itemSelection p {
   color: white;
-} */
-
-@keyframes lineInserted {
-  0% {
-    height: 0;
-    width: 0;
-    color:transparent;
-  }
-  90% {
-    color: white;
-  }
-  100% {
-    height: 50px;
-    /* width: 200px; */
-    border-bottom: 1px solid silver;
-  }
-}
-div.itemMenu > .itemSelection, div.itemMenu > .mainSelection {
-  animation-duration: 0.5s;
-  animation-name: lineInserted;
-  transition: all 0.5s ease-in-out;
+  height: 50px;
+  border: 1px solid white;
 }
