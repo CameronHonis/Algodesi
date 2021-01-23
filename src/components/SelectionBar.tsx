@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
 import { V2 } from '../models/V2'
 import ItemSelection from './ItemSelection'
 
@@ -20,13 +20,13 @@ const itemsByGroup: { [key in GroupSelectKeys]: MenuItem[] } = {
   NONE:
     [
       {
-        itemName: 'Graph Node',
+        itemName: 'Graph',
         pos: new V2(50, 50),
         svg: null,
         category: GroupSelect.NONE,
       },
       {
-        itemName: 'List item',
+        itemName: 'Array',
         pos: new V2(50, 50),
         svg: null,
         category: GroupSelect.NONE
@@ -205,7 +205,7 @@ export const initBarState: initBarRef = {
   isTweeningBar: false,
 }
 
-enum BarRefsAction {
+export enum BarRefsAction {
   SET_BAR_SIZE,
   SET_BAR_TARGET_SIZE
 }
@@ -230,7 +230,7 @@ const SelectionBar: React.FC = () => {
   const renderBarSize = (): void => {
     const size: V2 = refs.current.size;
     const collection = itemsByGroup[refs.current.selected];
-    console.log(collection);
+    // console.log(collection);
     if (barSizeRef.current) {
       const barSize: V2 = new V2(size.x, size.y);
       barSizeRef.current.style.width = barSize.x + "px";
@@ -238,7 +238,7 @@ const SelectionBar: React.FC = () => {
     }
     if (size.y >= collection.length * 1) {
       refs.current.rendered = collection
-      console.log(refs.current.rendered)
+      // console.log(refs.current.rendered)
     }
   }
 
@@ -261,17 +261,18 @@ const SelectionBar: React.FC = () => {
     setBarRefs(BarRefsAction.SET_BAR_SIZE, { size: refs.current.size });
   }, [])
 
-  React.useEffect(() => {
-    if (barSizeRef && barSizeRef.current) {
-      barSizeRef.current.addEventListener("click", e => {
-        console.log(e)
-        const collection = itemsByGroup[refs.current.selected];
-        const newX = 200
-        const newY = collection.length * 50
-        setBarRefs(BarRefsAction.SET_BAR_TARGET_SIZE, { size: new V2(newX, newY) });
-      })
-    }
-  }, []) //eslint-disable-line
+  // React.useEffect(() => {
+  //   if (barSizeRef && barSizeRef.current) {
+  //     barSizeRef.current.addEventListener("click", e => {
+  //       e.stopPropagation()
+  //       console.log(e)
+  //       const collection = itemsByGroup[refs.current.selected];
+  //       const newX = 200
+  //       const newY = collection.length * 50
+  //       setBarRefs(BarRefsAction.SET_BAR_TARGET_SIZE, { size: new V2(newX, newY) });
+  //     })
+  //   }
+  // }, []) //eslint-disable-line
 
   // for (let i = 0; i < )
 
@@ -279,7 +280,7 @@ const SelectionBar: React.FC = () => {
     <div className='itemMenu' ref={barSizeRef}>
       {
         refs.current.rendered.map(item => {
-          return <ItemSelection itemName={item.itemName}/>
+          return <ItemSelection itemName={item.itemName} setBarRefs={setBarRefs} barSizeRef={barSizeRef} itemsByGroup={itemsByGroup} refs={refs}/>
         })
       }
     </div>
