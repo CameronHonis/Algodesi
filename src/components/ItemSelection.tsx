@@ -5,13 +5,12 @@ import {BarRefsAction} from './SelectionBar'
 type ItemSelectionProps = {
   itemName: string,
   setBarRefs: any,
-  barSizeRef: any,
   itemsByGroup: any,
   refs: any
 }
 
 const ItemSelection: React.FC<ItemSelectionProps> = (props) => {
-  const { itemName, setBarRefs, barSizeRef, itemsByGroup, refs } = props
+  const { itemName, setBarRefs, itemsByGroup, refs } = props
 
   const itemSelectRef = React.useRef<HTMLDivElement>(null);
 
@@ -34,13 +33,13 @@ const ItemSelection: React.FC<ItemSelectionProps> = (props) => {
         console.log(e.target.parentElement.id)
         if (e.target.parentElement.id === 'Graph') {
           refs.current.selected = 'NODE'
-        } else if (e.target.parentElement.id == 'Array') {
+        } else if (e.target.parentElement.id === 'Array') {
           refs.current.selected = 'LIST'
         }
         const collection = itemsByGroup[refs.current.selected];
         console.log(collection)
         const newX = 200
-        const newY = collection.length * 50
+        const newY = (collection.length * 50) + 25
         setBarRefs(BarRefsAction.SET_BAR_TARGET_SIZE, { size: new V2(newX, newY) });
     }
   }

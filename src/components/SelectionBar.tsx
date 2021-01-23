@@ -213,6 +213,7 @@ export enum BarRefsAction {
 
 const SelectionBar: React.FC = () => {
   const barSizeRef = React.useRef<HTMLDivElement>(null);
+  const [rendered, setRendered] = React.useState(itemsByGroup.NONE)
 
   const refs = React.useRef(initBarState);
 
@@ -230,16 +231,15 @@ const SelectionBar: React.FC = () => {
   const renderBarSize = (): void => {
     const size: V2 = refs.current.size;
     const collection = itemsByGroup[refs.current.selected];
-    // console.log(collection);
+    console.log(collection);
     if (barSizeRef.current) {
       const barSize: V2 = new V2(size.x, size.y);
       barSizeRef.current.style.width = barSize.x + "px";
       barSizeRef.current.style.height = barSize.y + "px";
     }
-    if (size.y >= collection.length * 1) {
-      refs.current.rendered = collection
-      // console.log(refs.current.rendered)
-    }
+    refs.current.rendered = collection
+    setRendered(collection)
+    // console.log(refs.current.rendered)
   }
 
   const initBarSizeTween = (): void => {
@@ -274,13 +274,27 @@ const SelectionBar: React.FC = () => {
   //   }
   // }, []) //eslint-disable-line
 
-  // for (let i = 0; i < )
+  const clickHandler = (e: any) => {
+        refs.current.selected = 'NONE'
+        const collection = itemsByGroup[refs.current.selected];
+        console.log(collection)
+        const newX = 50
+        const newY = collection.length * 50
+        setBarRefs(BarRefsAction.SET_BAR_TARGET_SIZE, { size: new V2(newX, newY) });
+    }
 
   return (
     <div className='itemMenu' ref={barSizeRef}>
       {
-        refs.current.rendered.map(item => {
-          return <ItemSelection itemName={item.itemName} setBarRefs={setBarRefs} barSizeRef={barSizeRef} itemsByGroup={itemsByGroup} refs={refs}/>
+        refs.current.selected != "NONE" ?
+          <div id='selectNone' onClick={e => {clickHandler(e)}}>
+            <p>close this b</p>
+          </div>
+          : null
+      }
+      {
+        rendered.map(item => {
+          return <ItemSelection itemName={item.itemName} setBarRefs={setBarRefs} itemsByGroup={itemsByGroup} refs={refs} />
         })
       }
     </div>
