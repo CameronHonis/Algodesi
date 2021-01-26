@@ -231,7 +231,6 @@ const SelectionBar: React.FC = () => {
   const renderBarSize = (): void => {
     const size: V2 = refs.current.size;
     const collection = itemsByGroup[refs.current.selected];
-    console.log(collection);
     if (barSizeRef.current) {
       const barSize: V2 = new V2(size.x, size.y);
       barSizeRef.current.style.width = barSize.x + "px";
@@ -239,7 +238,6 @@ const SelectionBar: React.FC = () => {
     }
     refs.current.rendered = collection
     setRendered(collection)
-    // console.log(refs.current.rendered)
   }
 
   const initBarSizeTween = (): void => {
@@ -261,23 +259,9 @@ const SelectionBar: React.FC = () => {
     setBarRefs(BarRefsAction.SET_BAR_SIZE, { size: refs.current.size });
   }, [])
 
-  // React.useEffect(() => {
-  //   if (barSizeRef && barSizeRef.current) {
-  //     barSizeRef.current.addEventListener("click", e => {
-  //       e.stopPropagation()
-  //       console.log(e)
-  //       const collection = itemsByGroup[refs.current.selected];
-  //       const newX = 200
-  //       const newY = collection.length * 50
-  //       setBarRefs(BarRefsAction.SET_BAR_TARGET_SIZE, { size: new V2(newX, newY) });
-  //     })
-  //   }
-  // }, []) //eslint-disable-line
-
   const clickHandler = (e: any) => {
         refs.current.selected = 'NONE'
         const collection = itemsByGroup[refs.current.selected];
-        console.log(collection)
         const newX = 50
         const newY = collection.length * 50
         setBarRefs(BarRefsAction.SET_BAR_TARGET_SIZE, { size: new V2(newX, newY) });
@@ -286,9 +270,9 @@ const SelectionBar: React.FC = () => {
   return (
     <div className='itemMenu' ref={barSizeRef}>
       {
-        refs.current.selected != "NONE" ?
+        refs.current.selected !== "NONE" ?
           <div id='selectNone' onClick={e => {clickHandler(e)}}>
-            <p>close this b</p>
+            <p>X - close this b</p>
           </div>
           : null
       }
@@ -303,34 +287,3 @@ const SelectionBar: React.FC = () => {
 }
 
 export default SelectionBar
-// return (
-//   <div className='itemMenu'>
-//     <div onClick={e => closeDiv(e)}>x</div>
-//     {menu.isNodeType ?
-//       nodeMenuItems.map(item => {
-//         return <ItemSelection itemName={item.itemName} className={item.className}/>
-//       })
-//       :
-//       menu.isListType ?
-//       arrayMenuItems.map(item => {
-//         return <ItemSelection itemName={item.itemName} className={item.className}/>
-//       })
-//         :
-//         <>
-//           <div
-//             onClick={e => openDiv(e)}
-//             id='nodeType'
-//             className='mainSelection'
-//           >Graph Node</div>
-//           <div
-//             onClick={e => openDiv(e)}
-//             id='arrayType'
-//             className='mainSelection'
-//           >List item</div>
-//           <div className='mainSelection'><p>pencil</p></div>
-//           <div className='mainSelection'><p>eraser</p></div>
-//           <div className='mainSelection'><p>input</p></div>
-//         </>
-//     }
-//   </div>
-// )
