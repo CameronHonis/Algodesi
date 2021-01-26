@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
 import { V2 } from '../models/V2'
 import ItemSelection from './ItemSelection'
 
@@ -20,13 +20,13 @@ const itemsByGroup: { [key in GroupSelectKeys]: MenuItem[] } = {
   NONE:
     [
       {
-        itemName: 'Graph Node',
+        itemName: 'Graph',
         pos: new V2(50, 50),
         svg: null,
         category: GroupSelect.NONE,
       },
       {
-        itemName: 'List item',
+        itemName: 'Array',
         pos: new V2(50, 50),
         svg: null,
         category: GroupSelect.NONE
@@ -205,7 +205,7 @@ export const initBarState: initBarRef = {
   isTweeningBar: false,
 }
 
-enum BarRefsAction {
+export enum BarRefsAction {
   SET_BAR_SIZE,
   SET_BAR_TARGET_SIZE
 }
@@ -213,6 +213,7 @@ enum BarRefsAction {
 
 const SelectionBar: React.FC = () => {
   const barSizeRef = React.useRef<HTMLDivElement>(null);
+  const [rendered, setRendered] = React.useState(itemsByGroup.NONE)
 
   const refs = React.useRef(initBarState);
 
@@ -230,16 +231,13 @@ const SelectionBar: React.FC = () => {
   const renderBarSize = (): void => {
     const size: V2 = refs.current.size;
     const collection = itemsByGroup[refs.current.selected];
-    console.log(collection);
     if (barSizeRef.current) {
       const barSize: V2 = new V2(size.x, size.y);
       barSizeRef.current.style.width = barSize.x + "px";
       barSizeRef.current.style.height = barSize.y + "px";
     }
-    if (size.y >= collection.length * 1) {
-      refs.current.rendered = collection
-      console.log(refs.current.rendered)
-    }
+    refs.current.rendered = collection
+    setRendered(collection)
   }
 
   const initBarSizeTween = (): void => {
@@ -261,25 +259,26 @@ const SelectionBar: React.FC = () => {
     setBarRefs(BarRefsAction.SET_BAR_SIZE, { size: refs.current.size });
   }, [])
 
-  React.useEffect(() => {
-    if (barSizeRef && barSizeRef.current) {
-      barSizeRef.current.addEventListener("click", e => {
-        console.log(e)
+  const clickHandler = (e: any) => {
+        refs.current.selected = 'NONE'
         const collection = itemsByGroup[refs.current.selected];
-        const newX = 200
+        const newX = 50
         const newY = collection.length * 50
         setBarRefs(BarRefsAction.SET_BAR_TARGET_SIZE, { size: new V2(newX, newY) });
-      })
     }
-  }, []) //eslint-disable-line
-
-  // for (let i = 0; i < )
 
   return (
     <div className='itemMenu' ref={barSizeRef}>
       {
-        refs.current.rendered.map(item => {
-          return <ItemSelection itemName={item.itemName}/>
+        refs.current.selected !== "NONE" ?
+          <div id='selectNone' onClick={e => {clickHandler(e)}}>
+            <p>X - close this b</p>
+          </div>
+          : null
+      }
+      {
+        rendered.map(item => {
+          return <ItemSelection itemName={item.itemName} setBarRefs={setBarRefs} itemsByGroup={itemsByGroup} refs={refs} />
         })
       }
     </div>
@@ -288,34 +287,3 @@ const SelectionBar: React.FC = () => {
 }
 
 export default SelectionBar
-// return (
-//   <div className='itemMenu'>
-//     <div onClick={e => closeDiv(e)}>x</div>
-//     {menu.isNodeType ?
-//       nodeMenuItems.map(item => {
-//         return <ItemSelection itemName={item.itemName} className={item.className}/>
-//       })
-//       :
-//       menu.isListType ?
-//       arrayMenuItems.map(item => {
-//         return <ItemSelection itemName={item.itemName} className={item.className}/>
-//       })
-//         :
-//         <>
-//           <div
-//             onClick={e => openDiv(e)}
-//             id='nodeType'
-//             className='mainSelection'
-//           >Graph Node</div>
-//           <div
-//             onClick={e => openDiv(e)}
-//             id='arrayType'
-//             className='mainSelection'
-//           >List item</div>
-//           <div className='mainSelection'><p>pencil</p></div>
-//           <div className='mainSelection'><p>eraser</p></div>
-//           <div className='mainSelection'><p>input</p></div>
-//         </>
-//     }
-//   </div>
-// )

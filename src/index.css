@@ -90,4 +90,9 @@ body {
   color: white;
   height: 50px;
   border: 1px solid white;
+  overflow: hidden;
+}
+
+#selectNone {
+  height: 25px;
 }
