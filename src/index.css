@@ -85,11 +85,21 @@ body {
   border: 1px solid grey;
 }
 
-
+.itemSelection {
+  border: 1px solid white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+}
 .itemSelection p {
   color: white;
-  height: 50px;
-  border: 1px solid white;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   overflow: hidden;
 }
 
