@@ -3,9 +3,9 @@ import Helpers from "../Helpers";
 import { BST } from "./BST";
 
 export enum NodeChildCategory {
-  LEFT,
-  RIGHT,
-  GROUP
+  LEFT = "LEFT",
+  RIGHT = "RIGHT",
+  GROUP = "GROUP"
 }
 
 let nextId: number = 0;
@@ -21,13 +21,16 @@ export class Node {
   // read-onlys vvv
   public readonly id: number;
   public leftCount: number = 0;
+  public leftDepth: number = 0;
   public rightCount: number = 0;
+  public rightDepth: number = 0;
   public childrenCount: number = 0;
+  public toRender: boolean = true;
 
-  constructor(ds: DS, value: number, left?: Node, right?: Node, children?: Node[], parent?: Node, displayChar?: boolean)
-  constructor(object: {ds: DS, value: number, left?: Node, right?: Node, children?: Node[], displayChar?: boolean})
+  constructor(ds: DS | null, value: number, left?: Node, right?: Node, children?: Node[], parent?: Node, displayChar?: boolean)
+  constructor(object: {ds: DS | null, value: number, left?: Node, right?: Node, children?: Node[], displayChar?: boolean})
   constructor(...arg: any) {
-    if (arg[0] instanceof DS) {
+    if (arg[0] instanceof DS || !arg[0]) {
       this.ds = arg[0];
       this.value = arg[1];
       if (arg[2] !== undefined) {
@@ -89,58 +92,51 @@ export class Node {
   }
 
   addChild(childCategory: NodeChildCategory, node: Node): void {
-    if (node.left || node.right) { 
-      throw new Error("Unable to add " + node.toString() + " with children nodes in BST.addChild");
+    const queue: Node[] = [node];
+    let pointer: number = 0
+    while (pointer < queue.length) {
+      const node2: Node = queue[pointer];
+      if (node2.left) {
+        queue.push(node2.left);
+      }
+      if (node2.right) {
+        queue.push(node2.right);
+      }
+      if (childCategory === NodeChildCategory.LEFT && node2.value >= this.value) {
+        throw new Error("Unable to add " + node2.toString() + " in " + (this.ds as BST).treeString(node) + 
+          " to left of " + this.toString() + " in " + (this.ds as BST).treeString() + " for Node.addChild(LEFT)");
+      } else if (childCategory === NodeChildCategory.RIGHT && node2.value < this.value) {
+        throw new Error("Unable to add " + node2.toString() + " in " + (this.ds as BST).treeString(node) + 
+          " to right of " + this.toString() + " in " + (this.ds as BST).treeString() + " for Node.addChild(RIGHT)");
+      }
+      pointer++;
     }
     if (childCategory === NodeChildCategory.LEFT) {
-      if (this.left) throw new Error("Unable to push node " + node.toString() + ". Left node already exists on " + this.toString() + " for Node.addChild");
-      if (node.value >= this.value) throw new Error("Cannot push node of greater/equal value to " + this.toString() + " for Node.addChild");
+      if (this.left) throw new Error("Unable to push " + node.toString() + ". Left node already exists on " + this.toString() + " for Node.addChild");
       if (this.children.length > 0) console.warn("inconsistent children categories on " + this.toString() + " for Node.addChild");
       if (node.parent) console.warn("Forced parent override of " + this.toString() + " for Node.addChild");
       node.removeParent();
       node.parent = this;
-      node.ds = this.ds;
+      node.updateDS(this.ds);
       this.left = node;
-      this.leftCount += node.childrenCount + 1;
-      this.childrenCount += node.childrenCount + 1;
-      let pointer: Node = this;
-      while (pointer.parent) {
-        if (pointer.parent.left === pointer) {
-          pointer.parent.leftCount += node.childrenCount + 1;
-        } else {
-          pointer.parent.rightCount += node.childrenCount + 1;
-        }
-        pointer.parent.childrenCount += node.childrenCount + 1;
-        pointer = pointer.parent;
-      }
+      this.addChildrenCount(node.childrenCount + 1, NodeChildCategory.LEFT);
+      this.updateDepth(NodeChildCategory.LEFT, Math.max(node.leftDepth, node.rightDepth) + 1);
     } else if (childCategory === NodeChildCategory.RIGHT) {
-      if (this.right) throw new Error("Unable to push node " + node.id + ". Right node already exists on " + this.toString() + " for Node.addChild(RIGHT)");
-      if (node.value < this.value) throw new Error("Cannot push node of lesser value to " + this.toString() + " for Node.addChild(RIGHT)");
+      if (this.right) throw new Error("Unable to push " + node.id + ". Right node already exists on " + this.toString() + " for Node.addChild(RIGHT)");
       if (this.children.length > 0) console.warn("inconsistent children categories on " + this.toString() + " for Node.addChild(RIGHT)");
       if (node.parent) console.warn("Forced parent override of " + this.toString() + " for Node.addChild(RIGHT)");
       node.removeParent();
       node.parent = this;
-      node.ds = this.ds;
+      node.updateDS(this.ds);
       this.right = node;
-      this.rightCount += node.childrenCount + 1;
-      this.childrenCount += node.childrenCount + 1;
-      let pointer: Node = this;
-      while (pointer.parent) {
-        if (pointer.parent.left === pointer) {
-          pointer.parent.leftCount += node.childrenCount + 1;
-        } else {
-          pointer.parent.rightCount += node.childrenCount + 1;
-        }
-        pointer.parent.childrenCount += node.childrenCount + 1;
-        pointer = pointer.parent;
-      }
+      this.addChildrenCount(node.childrenCount + 1, NodeChildCategory.RIGHT);
+      this.updateDepth(NodeChildCategory.RIGHT, Math.max(node.leftDepth, node.rightDepth) + 1);
     } else {
       if (this.left || this.right) console.warn("inconsistent children categories on " + this.toString() + " for Node.addChild(GROUP)");
       if (node.parent) console.warn("Forced parent override of " + this.toString() + " for Node.addChild(GROUP)");
       node.removeParent();
       node.parent = this;
       node.ds = this.ds;
-
       this.children.push(node);
       let pointer: Node | null = this;
       while (pointer) {
@@ -169,6 +165,7 @@ export class Node {
         }
       }
       this.addChildrenCount(-removeNode.childrenCount - 1, childCategory);
+      this.updateDepth(childCategory, 0);
       removeNode.parent = null;
       removeNode.ds = null;
       return removeNode;
@@ -191,6 +188,7 @@ export class Node {
     }
   }
 
+  // chained iterators vvvv
   addChildrenCount(adder: number, category?: NodeChildCategory): void { // can be negative
     if (category === NodeChildCategory.LEFT) {
       this.leftCount += adder;
@@ -198,22 +196,40 @@ export class Node {
       this.rightCount += adder;
     }
     this.childrenCount += adder;
-    if (this.parent) {
-      if (this.ds instanceof BST) {
-        if (this.parent.left === this) {
-          this.parent.addChildrenCount(adder, NodeChildCategory.LEFT);
-        } else {
-          this.parent.addChildrenCount(adder, NodeChildCategory.RIGHT);
-        }
+    if (this.parent && this.ds instanceof BST) {
+      if (this.parent.left === this) {
+        this.parent.addChildrenCount(adder, NodeChildCategory.LEFT);
       } else {
-        this.parent.addChildrenCount(adder);
+        this.parent.addChildrenCount(adder, NodeChildCategory.RIGHT);
       }
     }
   }
 
-  setMinDepth(minDepth: number): void {
-    
+  updateDepth(category: NodeChildCategory, newValue: number): void {
+    if (category === NodeChildCategory.LEFT) {
+      this.leftDepth = newValue;
+    } else {
+      this.rightDepth = newValue;
+    }
+    if (this.parent) {
+      if (this.parent.left === this) {
+        this.parent.updateDepth(NodeChildCategory.LEFT, newValue + 1);
+      } else {
+        this.parent.updateDepth(NodeChildCategory.RIGHT, newValue + 1);
+      }
+    }
   }
+
+  updateDS(ds: DS | null): void {
+    this.ds = ds;
+    if (this.right) {
+      this.right.updateDS(ds);
+    }
+    if (this.left) {
+      this.left.updateDS(ds);
+    }
+  }
+
 
   compare(node: Node): number {
     if (this.value < node.value) {
@@ -228,9 +244,9 @@ export class Node {
   toString(fields: Array<keyof Node> = ["id", "value"]): string {
     let rtn: string = "Node("
     const addedFields: Set<string> = new Set();
-    for (let i = 0; i < arguments.length; ++i) {
+    for (let i = 0; i < fields.length; ++i) {
       if (!addedFields.has(fields[i])) {
-        rtn += (i ? "" : ", ") + fields[i] + ": " + this[fields[i]];
+        rtn += (i ? ", " : "") + fields[i] + ": " + this[fields[i]];
         addedFields.add(fields[i]);
       }
     }

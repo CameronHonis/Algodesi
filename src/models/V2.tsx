@@ -69,8 +69,8 @@ export class V2 {
     return new V2(Math.sign(this.x), Math.sign(this.y));
   }
 
-  originAngle(lowerBound: number = 0): number { // minimum angle between vector and positive x-axis above the lower bound
-    return (Math.atan(this.y/this.x) + 2*Math.PI) % Math.PI + lowerBound;
+  originAngle(lowerBound: number = 0): number { // counter-clockwise angle between vector and positive x-axis above the lower bound
+    return (Math.atan2(this.y, this.x) + 2*Math.PI) % (2*Math.PI) + lowerBound;
   }
 
   angleBetween(v2: V2) {
@@ -85,14 +85,14 @@ export class V2 {
   dot(xy: [number, number]): number
   dot(xy: [string, string]): number
   dot(...arg: any): number {
-    let dotV2: V2;
+    let that: V2;
     try {
-      dotV2 = new V2(arg[0], arg[1]);
+      that = new V2(arg[0], arg[1]);
     } catch { 
       throw new Error ("Error constructing arg[1] V2, unhandled parameter types: " 
       + typeof(arg[0]) + (arg[1] ? ", " + typeof(arg[1]) : "") + " for V2.dot");
     }
-    return this.magnitude() * dotV2.magnitude() * Math.cos(this.angleBetween(dotV2));
+    return this.x*that.x + this.y*that.y;
   }
 
   parallelProduct(v2: V2): V2
