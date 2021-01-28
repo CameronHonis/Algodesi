@@ -99,10 +99,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-
   overflow: hidden;
 }
 
 #selectNone {
   height: 25px;
 }
+/* rgb (0, 200, 200) aqua
+chacoal (50,50,50)
+background-light grey (230,230,230)
+background-dark (charcoal)
+*/

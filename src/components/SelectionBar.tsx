@@ -10,9 +10,9 @@ enum GroupSelect {
 
 type GroupSelectKeys = keyof typeof GroupSelect
 export interface MenuItem {
-  itemName: string;
-  pos: V2;
-  svg?: JSX.Element | null;
+  itemName: string
+  pos: V2
+  svg?: JSX.Element | null
   category: GroupSelect
 }
 
@@ -220,7 +220,6 @@ const SelectionBar: React.FC = () => {
   const setBarRefs = (action: BarRefsAction, arg: any): any => {
     if (action === BarRefsAction.SET_BAR_SIZE && arg && arg.size) {
       refs.current.size = arg.size
-      // (rendered.length * 50px) - 
       renderBarSize()
     } else if (action === BarRefsAction.SET_BAR_TARGET_SIZE && arg && arg.size) {
       refs.current.targetSize = arg.size
