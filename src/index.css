@@ -85,14 +85,28 @@ body {
   border: 1px solid grey;
 }
 
-
+.itemSelection {
+  border: 1px solid white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+}
 .itemSelection p {
   color: white;
-  height: 50px;
-  border: 1px solid white;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
 }
 
 #selectNone {
   height: 25px;
 }
+/* rgb (0, 200, 200) aqua
+chacoal (50,50,50)
+background-light grey (230,230,230)
+background-dark (charcoal)
+*/
