@@ -1,33 +1,21 @@
 import React, { useEffect } from "react";
-import { BST } from "./models/BST";
-
-import { DS } from "./models/DS";
-import { V2 } from "./models/V2";
 import { Window } from "./Window";
 
-
 export interface Refs {
-  keysDown: Set<string>;
-}
+  keysDown: Set<string | number>;
+};
 
 export const initRefs: Refs = {
   keysDown: new Set(),
-}
+};
 
 export interface State {
-  window: {
-    components: DS[];
-  }
-}
+
+};
 
 export const initState: State = {
-  window: {
-    components: []
-    //   new BST([1,2,3], new V2(0, 0)),
-    //   new BST([4,5,6], new V2(5,0))
-    // ]
-  },
-}
+
+};
 
 export interface AppContextType {
   refs: Refs;
@@ -38,40 +26,49 @@ export interface AppContextType {
 export const AppContext = React.createContext<AppContextType>({refs: initRefs, state: initState, setState: () => {}});
 
 export const App: React.FC = () => {
-  const refs = React.useRef<Refs>(initRefs);
+  const { current: refs } = React.useRef<Refs>(initRefs);
   const [ state, setState ] = React.useState<State>(initState);
 
   const keysUpdated = () => {
-    if (refs.current.keysDown.has("q") || refs.current.keysDown.has("Q")) {
-      if (refs.current.keysDown.has("Shift") || refs.current.keysDown.has("Ctrl")) {
+    if (refs.keysDown.has("q") || refs.keysDown.has("Q")) {
+      if (refs.keysDown.has("Shift") || refs.keysDown.has("Control")) {
         console.log("appState: ", state)
-        console.log("appRefs: ", refs.current)
+        console.log("appRefs: ", refs)
       }
-      refs.current.keysDown.delete("q");
-      refs.current.keysDown.delete("Q");
-      refs.current.keysDown.delete("Shift");
-      refs.current.keysDown.delete("Ctrl");
+      refs.keysDown.delete("q");
+      refs.keysDown.delete("Q");
+      refs.keysDown.delete("Shift");
+      refs.keysDown.delete("Control");
       debugger;
     }
   }
 
-  const setKeyRefs = () => {
-
+  const setKeyRefs = (key: string | number, down: boolean = true) => {
+    if (down) {
+      refs.keysDown.add(key);
+    } else {
+      refs.keysDown.delete(key);
+    }
+    keysUpdated();
   }
 
   useEffect(() => {
-    document.addEventListener("keydown", e => {
-      refs.current.keysDown.add(e.key);
-      keysUpdated();
-    })
+    document.addEventListener("keydown", e => { 
+      setKeyRefs(e.key);
+    });
+    document.addEventListener("mousedown", e => {
+      setKeyRefs(e.button);
+    });
     document.addEventListener("keyup", e => {
-      refs.current.keysDown.delete(e.key);
-      keysUpdated();
-    })
+      setKeyRefs(e.key, false);
+    });
+    document.addEventListener("mouseup", e => {
+      setKeyRefs(e.button, false);
+    });
   }, []); //eslint-disable-line
   return (
     <div className="App">
-      <AppContext.Provider value={{refs: refs.current, state, setState}}>
+      <AppContext.Provider value={{refs: refs, state, setState}}>
         <Window />
       </AppContext.Provider>
     </div>
