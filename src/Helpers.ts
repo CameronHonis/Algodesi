@@ -1,3 +1,6 @@
+import { V2 } from "./models/V2";
+import { RefsAction } from "./Window";
+
 export default class Helpers {
   static binarySearch(callback: (val: any) => number, arr: any[]): [number, boolean]
   static binarySearch(value: number, arr: number[]): [number, boolean]
@@ -51,5 +54,49 @@ export default class Helpers {
       }
     }
     return [rightPointer + 1, foundMatch];
+  }
+
+  static round(num: number, sigFigs: number = 4, sciNotation: boolean = false): string {
+    sigFigs = Math.max(sigFigs, 1);
+    const coeff: number = Math.pow(10, sigFigs-1);
+    const pow10: number = num ? -Math.ceil(Math.log10(Math.abs(1/num))) : 0;
+    const rounded: number = Math.round(coeff*Math.pow(10, -pow10)*num)/coeff;
+    if (sciNotation) {
+      return rounded + (pow10 ? "E" + pow10 : "");
+    } else {
+      const xStrSize: number = Math.max(
+        sigFigs + pow10 + Math.max(-Math.sign(rounded),0),
+        sigFigs - pow10 + 1 + Math.max(-Math.sign(rounded),0),
+        sigFigs + 1);
+      return (rounded*Math.pow(10, pow10)).toString().slice(0, xStrSize);
+    }
+  }
+
+  static toPixelPos(screenPos: V2, screenSize: V2, pos: V2): V2 { // converts pos from appState dimensions into DOM pix dimension
+    return new V2(
+      (pos.x - screenPos.x + screenSize.x/2) / screenSize.x * window.innerWidth,
+      (1 - (pos.y - screenPos.y + screenSize.y/2) / screenSize.y) * window.innerHeight
+    );
+  }
+
+  static toScreenPos(screenPos: V2, screenSize: V2, pos: V2): V2 { // converts pos from DOM pix dimensions into appState dimension
+    return new V2(
+      pos.x / window.innerWidth * screenSize.x - screenSize.x/2 + screenPos.x,
+      (1 - pos.y / window.innerHeight) * screenSize.y - screenSize.y/2 + screenPos.y
+    );
+  }
+
+  static toPixelSize(screenSize: V2, size: V2): V2 { // converts appState dimension to DOM pix dimension
+    return new V2(
+      size.x / screenSize.x * window.innerWidth,
+      size.y / screenSize.y * window.innerHeight
+    );
+  }
+
+  static toScreenSize(screenSize: V2, size: V2): V2 { // converts DOM pix dimension to appState dimension
+    return new V2(
+      size.x / window.innerWidth * screenSize.x,
+      size.y / window.innerHeight * screenSize.y
+    );
   }
 }
