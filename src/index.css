@@ -74,7 +74,7 @@ body {
 /* SelectionBar vvv */
 
 .itemMenu {
-  /* background-color: black; */
+  background-color: rgb(50,50,50);
   margin: 0;
   position: absolute;
   top: 20px;
