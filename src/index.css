@@ -92,19 +92,34 @@ body {
   align-items: center;
   height: 50px;
 }
-.itemSelection p {
+.itemSelection > *{
   color: white;
   height: 100%;
   width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
   overflow: hidden;
 }
 
 #selectNone {
   height: 25px;
+  background-color: rgb(0, 200, 200);
 }
+
+#selectNone p {
+  margin: 0 1rem;
+}
+
+.itemSVG {
+  width: calc(50px + 0.5rem);
+  height: 100%;
+  margin-left: 0.5rem;
+}
+
+.itemName {
+  width: calc(85% - 0.5rem);
+}
+
 /* rgb (0, 200, 200) aqua
 chacoal (50,50,50)
 background-light grey (230,230,230)
