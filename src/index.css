@@ -82,11 +82,11 @@ body {
   border-radius: 10px;
   overflow: hidden;
   z-index: 500;
-  border: 1px solid grey;
+  border: 1px solid rgb(0, 200, 200);
 }
 
 .itemSelection {
-  border: 1px solid white;
+  border: 1px solid rgb(0, 200, 200);
   display: flex;
   justify-content: center;
   align-items: center;
