@@ -120,6 +120,10 @@ body {
   width: calc(85% - 0.5rem);
 }
 
+.mainItemSVG {
+  margin: 0 auto;
+}
+
 /* rgb (0, 200, 200) aqua
 chacoal (50,50,50)
 background-light grey (230,230,230)

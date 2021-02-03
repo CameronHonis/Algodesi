@@ -43,7 +43,7 @@ const ItemSelection: React.FC<ItemSelectionProps> = (props) => {
   } else {
   return (
     <div className='itemSelection' ref={itemSelectRef} onClick={e => {clickHandler(e)}}>
-      <p>{itemName}</p>
+      <p className='mainItemSVG'>{itemName}</p>
     </div>
   )
   }
