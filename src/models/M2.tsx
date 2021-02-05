@@ -1,4 +1,4 @@
-import Helpers from "../Helpers";
+import Helpers from "./Helpers";
 import { V2 } from "./V2";
 
 export class M2 {
@@ -85,7 +85,7 @@ export class M2 {
     const pixR1: V2 = Helpers.toPixelPos(screenPos, screenSize, this.r1);
     const mag: number = pixR1.add(pixR0.scale(-1)).magnitude();
     const angle: number = pixR1.add(pixR0.scale(-1)).originAngle();
-    const thick: number = Math.max(minThickness, Math.min(Math.sqrt(mag)*.1, maxThickness));
+    const thick: number = Math.max(minThickness, Math.min(Math.sqrt(mag)*.2, maxThickness));
     div.style.width = mag + "px";
     div.style.height = thick + "px";
     div.style.left = pixR0.x + "px";
@@ -97,6 +97,6 @@ export class M2 {
   matrixString(): string {
     const mag: number = this.r1.add(this.r0.scale(-1)).magnitude();
     const angle: number = this.r1.add(this.r0.scale(-1)).originAngle();
-    return "matrix(" + Math.cos(angle) + "," + -Math.sin(angle) + "," + Math.sin(angle) + "," + Math.cos(angle) + "," + (Math.cos(angle)-1)*mag/2 + "," + -Math.sin(angle)*mag/2 + ")";
+    return "matrix(" + Math.cos(angle) + "," + Math.sin(angle) + "," + -Math.sin(angle) + "," + Math.cos(angle) + "," + (Math.cos(angle)-1)*mag/2 + "," + Math.sin(angle)*mag/2 + ")";
   }
 }

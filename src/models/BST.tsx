@@ -1,4 +1,4 @@
-import { DS } from './DS'
+import { DS, DSType } from './DS'
 import { Node, NodeChildCategory } from './Node'
 
 export const BST_PRINTS: boolean = false;
@@ -10,14 +10,13 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
 
   // read-onlys vvv
   public root?: Node;
-  public nodeCount: number = 0;
   public balanced: boolean = true;
 
   constructor(value: number, selfBalancing?: boolean)
   constructor(node: Node, selfBalancing?: boolean)
   constructor(valueArray: number[], selfBalancing?: boolean)
   constructor(...arg: any) {
-    super();
+    super(DSType.BST);
     this.selfBalancing = arg[1] || false;
     if (typeof(arg[0]) === "number") {
       this.root = new Node(this, arg[0]);
@@ -59,7 +58,10 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
       if (BST_PRINTS) { console.log("insert: " + node.toString()); }
       if (!this.root) {
         this.root = node;
-        this.nodeCount = node.childrenCount + 1;
+        this.inOrderSearch((n) => {
+          this.nodes[n.id] = n;
+          return false;
+        })
         node.ds = this;
         continue;
       }
@@ -76,7 +78,6 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
       } else {
         pointer.addChild(NodeChildCategory.RIGHT, node);
       }
-      this.nodeCount++;
     }
     if (BST_PRINTS) { console.log(this.treeString()); }
     if (this.selfBalancing) {
@@ -163,12 +164,13 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
       } else {
         this.root.ds = null;
         this.root = undefined;
+        this.nodes = {};
         this.insert((left || right) as Node);
       }
     } else {
       if (this.root === node) {
         this.root = undefined;
-        this.nodeCount = 0;
+        this.nodes = {};
         node.ds = null;
       } else {
         node.removeParent();
@@ -247,7 +249,7 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
 
   balance(): void {
     if (!this.root) { return; }
-    const maxDepth: number = Math.floor(Math.log2(this.nodeCount)) + 1;
+    const maxDepth: number = Math.floor(Math.log2(Object.values(this.nodes).length)) + 1;
     if (this.root.leftDepth + 1 > maxDepth || this.root.rightDepth + 1 > maxDepth) {
       if (BST_PRINTS) { console.log("balance: " + this.treeString()); }
       const inOrderNodes: Node[] = this.inOrderSearch(() => true, false) || [];
@@ -675,6 +677,12 @@ export class BST extends DS { // Lesser than goes left, equal or greater goes ri
     } else {
       return null;
     }
+  }
+
+  getContextActions(): [string, (e: React.MouseEvent) => void][] {
+    return([
+      ["bstAction1", (e: React.MouseEvent) => console.log("bstAction1")],
+    ]);
   }
 
   toString(fields: Array<keyof BST> = ["id", "root"]) {

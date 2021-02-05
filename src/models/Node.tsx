@@ -1,6 +1,7 @@
 import { DS } from "./DS";
-import Helpers from "../Helpers";
+import Helpers from "./Helpers";
 import { BST } from "./BST";
+import { NodePhysics } from "./NodePhysics";
 
 export enum NodeChildCategory {
   LEFT = "LEFT",
@@ -12,6 +13,7 @@ let nextId: number = 0;
 export class Node {
   // iteractables vvv
   public ds: DS | null = null;
+  public physics: NodePhysics | null = null;
   public value: number;
   public left: Node | null = null;
   public right: Node | null = null;
@@ -20,6 +22,7 @@ export class Node {
   public displayChar: boolean = false;
   // read-onlys vvv
   public readonly id: number;
+  public depth: number = 0;
   public leftCount: number = 0;
   public leftDepth: number = 0;
   public rightCount: number = 0;
@@ -118,9 +121,10 @@ export class Node {
       node.removeParent();
       node.parent = this;
       node.updateDS(this.ds);
+      node.updateDepth(this.depth + 1);
       this.left = node;
       this.addChildrenCount(node.childrenCount + 1, NodeChildCategory.LEFT);
-      this.updateDepth(NodeChildCategory.LEFT, Math.max(node.leftDepth, node.rightDepth) + 1);
+      this.updateChildrenDepth(NodeChildCategory.LEFT, Math.max(node.leftDepth, node.rightDepth) + 1);
     } else if (childCategory === NodeChildCategory.RIGHT) {
       if (this.right) throw new Error("Unable to push " + node.id + ". Right node already exists on " + this.toString() + " for Node.addChild(RIGHT)");
       if (this.children.length > 0) console.warn("inconsistent children categories on " + this.toString() + " for Node.addChild(RIGHT)");
@@ -128,9 +132,10 @@ export class Node {
       node.removeParent();
       node.parent = this;
       node.updateDS(this.ds);
+      node.updateDepth(this.depth + 1);
       this.right = node;
       this.addChildrenCount(node.childrenCount + 1, NodeChildCategory.RIGHT);
-      this.updateDepth(NodeChildCategory.RIGHT, Math.max(node.leftDepth, node.rightDepth) + 1);
+      this.updateChildrenDepth(NodeChildCategory.RIGHT, Math.max(node.leftDepth, node.rightDepth) + 1);
     } else {
       if (this.left || this.right) console.warn("inconsistent children categories on " + this.toString() + " for Node.addChild(GROUP)");
       if (node.parent) console.warn("Forced parent override of " + this.toString() + " for Node.addChild(GROUP)");
@@ -165,9 +170,10 @@ export class Node {
         }
       }
       this.addChildrenCount(-removeNode.childrenCount - 1, childCategory);
-      this.updateDepth(childCategory, 0);
+      this.updateChildrenDepth(childCategory, 0);
       removeNode.parent = null;
       removeNode.ds = null;
+      removeNode.updateDepth(0);
       return removeNode;
     } else if (childCategory === NodeChildCategory.GROUP && node) {
       const [ idx, match ] = Helpers.binarySearch((v: Node) => Math.sign(node.id - v.id), this.children);
@@ -205,7 +211,17 @@ export class Node {
     }
   }
 
-  updateDepth(category: NodeChildCategory, newValue: number): void {
+  updateDepth(newValue: number): void {
+    this.depth = newValue;
+    if (this.left) {
+      this.left.updateDepth(newValue+1);
+    }
+    if (this.right) {
+      this.right.updateDepth(newValue+1);
+    }
+  }
+
+  updateChildrenDepth(category: NodeChildCategory, newValue: number): void {
     if (category === NodeChildCategory.LEFT) {
       this.leftDepth = newValue;
     } else {
@@ -213,15 +229,21 @@ export class Node {
     }
     if (this.parent) {
       if (this.parent.left === this) {
-        this.parent.updateDepth(NodeChildCategory.LEFT, newValue + 1);
+        this.parent.updateChildrenDepth(NodeChildCategory.LEFT, newValue + 1);
       } else {
-        this.parent.updateDepth(NodeChildCategory.RIGHT, newValue + 1);
+        this.parent.updateChildrenDepth(NodeChildCategory.RIGHT, newValue + 1);
       }
     }
   }
 
   updateDS(ds: DS | null): void {
-    this.ds = ds;
+      this.ds = ds;
+      if (this.ds) {
+        delete this.ds.nodes[this.id];
+      }
+      if (ds) {
+        ds.nodes[this.id] = this;
+      }
     if (this.right) {
       this.right.updateDS(ds);
     }
@@ -230,6 +252,11 @@ export class Node {
     }
   }
 
+  getContextActions(): [string, (e: React.MouseEvent) => void][] {
+    return([
+      ["nodeTest1", (e: React.MouseEvent) => console.log("nodeTest1")],
+    ]);
+  }
 
   compare(node: Node): number {
     if (this.value < node.value) {

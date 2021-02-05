@@ -24,10 +24,9 @@ var BST = /** @class */ (function (_super) {
         for (var _i = 0; _i < arguments.length; _i++) {
             arg[_i] = arguments[_i];
         }
-        var _this = _super.call(this) || this;
+        var _this = _super.call(this, DS_1.DSType.BST) || this;
         // iteractables
         _this.selfBalancing = false;
-        _this.nodeCount = 0;
         _this.balanced = true;
         _this.selfBalancing = arg[1] || false;
         if (typeof (arg[0]) === "number") {
@@ -47,6 +46,7 @@ var BST = /** @class */ (function (_super) {
         return _this;
     }
     BST.prototype.insert = function () {
+        var _this = this;
         var arg = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             arg[_i] = arguments[_i];
@@ -78,7 +78,10 @@ var BST = /** @class */ (function (_super) {
             }
             if (!this.root) {
                 this.root = node;
-                this.nodeCount = node.childrenCount + 1;
+                this.inOrderSearch(function (n) {
+                    _this.nodes[n.id] = n;
+                    return false;
+                });
                 node.ds = this;
                 continue;
             }
@@ -97,7 +100,6 @@ var BST = /** @class */ (function (_super) {
             else {
                 pointer_1.addChild(Node_1.NodeChildCategory.RIGHT, node);
             }
-            this.nodeCount++;
         }
         if (exports.BST_PRINTS) {
             console.log(this.treeString());
@@ -203,13 +205,14 @@ var BST = /** @class */ (function (_super) {
             else {
                 this.root.ds = null;
                 this.root = undefined;
+                this.nodes = {};
                 this.insert((left || right));
             }
         }
         else {
             if (this.root === node) {
                 this.root = undefined;
-                this.nodeCount = 0;
+                this.nodes = {};
                 node.ds = null;
             }
             else {
@@ -302,7 +305,7 @@ var BST = /** @class */ (function (_super) {
         if (!this.root) {
             return;
         }
-        var maxDepth = Math.floor(Math.log2(this.nodeCount)) + 1;
+        var maxDepth = Math.floor(Math.log2(Object.values(this.nodes).length)) + 1;
         if (this.root.leftDepth + 1 > maxDepth || this.root.rightDepth + 1 > maxDepth) {
             if (exports.BST_PRINTS) {
                 console.log("balance: " + this.treeString());
@@ -744,6 +747,11 @@ var BST = /** @class */ (function (_super) {
         else {
             return null;
         }
+    };
+    BST.prototype.getContextActions = function () {
+        return ([
+            ["bstAction1", function (e) { return console.log("bstAction1"); }],
+        ]);
     };
     BST.prototype.toString = function (fields) {
         if (fields === void 0) { fields = ["id", "root"]; }

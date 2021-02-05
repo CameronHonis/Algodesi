@@ -1,5 +1,4 @@
-import { V2 } from "./models/V2";
-import { RefsAction } from "./Window";
+import { V2 } from "./V2";
 
 export default class Helpers {
   static binarySearch(callback: (val: any) => number, arr: any[]): [number, boolean]
@@ -98,5 +97,33 @@ export default class Helpers {
       size.x / window.innerWidth * screenSize.x,
       size.y / window.innerHeight * screenSize.y
     );
+  }
+
+  static rad(deg: number): number { //converts degs to rads
+    return deg/180*Math.PI;
+  }
+
+  static deg(rad: number): number { // converts rads to degs
+    return rad*180/Math.PI;
+  }
+
+  static snapAngle(angle: number, lowerBound: number = 0) {
+    angle = ((angle - lowerBound) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+    return angle + lowerBound;
+  }
+
+  static deepCopy(obj: Object, rtnObj: Object = {}): Object {
+    if (typeof obj !== "object") {
+      return obj;
+    }
+    for (const [key, val] of Object.entries(obj)) {
+      if (typeof val !== "object") {
+        rtnObj[key] = val;
+      } else {
+        rtnObj[key] = {};
+        this.deepCopy(val, rtnObj[key]);
+      }
+    }
+    return rtnObj
   }
 }

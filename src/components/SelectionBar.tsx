@@ -271,7 +271,7 @@ const SelectionBar: React.FC = () => {
       }
       {
         rendered.map(item => {
-          return <ItemSelection itemName={item.itemName} setBarRefs={setBarRefs} itemsByGroup={itemsByGroup} refs={refs} />
+          return <ItemSelection key={item.itemName} itemName={item.itemName} setBarRefs={setBarRefs} itemsByGroup={itemsByGroup} refs={refs} />
         })
       }
     </div>

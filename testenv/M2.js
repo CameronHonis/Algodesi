@@ -1,7 +1,7 @@
 "use strict";
 exports.__esModule = true;
 exports.M2 = void 0;
-var Helpers_1 = require("../Helpers");
+var Helpers_1 = require("./Helpers");
 var V2_1 = require("./V2");
 var M2 = /** @class */ (function () {
     function M2() {
@@ -82,7 +82,7 @@ var M2 = /** @class */ (function () {
         var pixR1 = Helpers_1["default"].toPixelPos(screenPos, screenSize, this.r1);
         var mag = pixR1.add(pixR0.scale(-1)).magnitude();
         var angle = pixR1.add(pixR0.scale(-1)).originAngle();
-        var thick = Math.max(minThickness, Math.min(Math.sqrt(mag) * .1, maxThickness));
+        var thick = Math.max(minThickness, Math.min(Math.sqrt(mag) * .2, maxThickness));
         div.style.width = mag + "px";
         div.style.height = thick + "px";
         div.style.left = pixR0.x + "px";
@@ -93,7 +93,7 @@ var M2 = /** @class */ (function () {
     M2.prototype.matrixString = function () {
         var mag = this.r1.add(this.r0.scale(-1)).magnitude();
         var angle = this.r1.add(this.r0.scale(-1)).originAngle();
-        return "matrix(" + Math.cos(angle) + "," + -Math.sin(angle) + "," + Math.sin(angle) + "," + Math.cos(angle) + "," + (Math.cos(angle) - 1) * mag / 2 + "," + -Math.sin(angle) * mag / 2 + ")";
+        return "matrix(" + Math.cos(angle) + "," + Math.sin(angle) + "," + -Math.sin(angle) + "," + Math.cos(angle) + "," + (Math.cos(angle) - 1) * mag / 2 + "," + Math.sin(angle) * mag / 2 + ")";
     };
     return M2;
 }());

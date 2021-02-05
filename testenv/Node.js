@@ -2,7 +2,7 @@
 exports.__esModule = true;
 exports.Node = exports.NodeChildCategory = void 0;
 var DS_1 = require("./DS");
-var Helpers_1 = require("../Helpers");
+var Helpers_1 = require("./Helpers");
 var BST_1 = require("./BST");
 var NodeChildCategory;
 (function (NodeChildCategory) {
@@ -19,11 +19,13 @@ var Node = /** @class */ (function () {
         }
         // iteractables vvv
         this.ds = null;
+        this.physics = null;
         this.left = null;
         this.right = null;
         this.children = [];
         this.parent = null;
         this.displayChar = false;
+        this.depth = 0;
         this.leftCount = 0;
         this.leftDepth = 0;
         this.rightCount = 0;
@@ -124,9 +126,10 @@ var Node = /** @class */ (function () {
             node.removeParent();
             node.parent = this;
             node.updateDS(this.ds);
+            node.updateDepth(this.depth + 1);
             this.left = node;
             this.addChildrenCount(node.childrenCount + 1, NodeChildCategory.LEFT);
-            this.updateDepth(NodeChildCategory.LEFT, Math.max(node.leftDepth, node.rightDepth) + 1);
+            this.updateChildrenDepth(NodeChildCategory.LEFT, Math.max(node.leftDepth, node.rightDepth) + 1);
         }
         else if (childCategory === NodeChildCategory.RIGHT) {
             if (this.right)
@@ -138,9 +141,10 @@ var Node = /** @class */ (function () {
             node.removeParent();
             node.parent = this;
             node.updateDS(this.ds);
+            node.updateDepth(this.depth + 1);
             this.right = node;
             this.addChildrenCount(node.childrenCount + 1, NodeChildCategory.RIGHT);
-            this.updateDepth(NodeChildCategory.RIGHT, Math.max(node.leftDepth, node.rightDepth) + 1);
+            this.updateChildrenDepth(NodeChildCategory.RIGHT, Math.max(node.leftDepth, node.rightDepth) + 1);
         }
         else {
             if (this.left || this.right)
@@ -180,9 +184,10 @@ var Node = /** @class */ (function () {
                 }
             }
             this.addChildrenCount(-removeNode.childrenCount - 1, childCategory);
-            this.updateDepth(childCategory, 0);
+            this.updateChildrenDepth(childCategory, 0);
             removeNode.parent = null;
             removeNode.ds = null;
+            removeNode.updateDepth(0);
             return removeNode;
         }
         else if (childCategory === NodeChildCategory.GROUP && node) {
@@ -222,7 +227,16 @@ var Node = /** @class */ (function () {
             }
         }
     };
-    Node.prototype.updateDepth = function (category, newValue) {
+    Node.prototype.updateDepth = function (newValue) {
+        this.depth = newValue;
+        if (this.left) {
+            this.left.updateDepth(newValue + 1);
+        }
+        if (this.right) {
+            this.right.updateDepth(newValue + 1);
+        }
+    };
+    Node.prototype.updateChildrenDepth = function (category, newValue) {
         if (category === NodeChildCategory.LEFT) {
             this.leftDepth = newValue;
         }
@@ -231,21 +245,32 @@ var Node = /** @class */ (function () {
         }
         if (this.parent) {
             if (this.parent.left === this) {
-                this.parent.updateDepth(NodeChildCategory.LEFT, newValue + 1);
+                this.parent.updateChildrenDepth(NodeChildCategory.LEFT, newValue + 1);
             }
             else {
-                this.parent.updateDepth(NodeChildCategory.RIGHT, newValue + 1);
+                this.parent.updateChildrenDepth(NodeChildCategory.RIGHT, newValue + 1);
             }
         }
     };
     Node.prototype.updateDS = function (ds) {
         this.ds = ds;
+        if (this.ds) {
+            delete this.ds.nodes[this.id];
+        }
+        if (ds) {
+            ds.nodes[this.id] = this;
+        }
         if (this.right) {
             this.right.updateDS(ds);
         }
         if (this.left) {
             this.left.updateDS(ds);
         }
+    };
+    Node.prototype.getContextActions = function () {
+        return ([
+            ["nodeTest1", function (e) { return console.log("nodeTest1"); }],
+        ]);
     };
     Node.prototype.compare = function (node) {
         if (this.value < node.value) {
