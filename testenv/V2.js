@@ -73,14 +73,28 @@ var V2 = /** @class */ (function () {
     V2.prototype.sign = function () {
         return new V2(Math.sign(this.x), Math.sign(this.y));
     };
+    V2.prototype.abs = function () {
+        return new V2(Math.abs(this.x), Math.abs(this.y));
+    };
+    V2.prototype.pow = function (pow) {
+        return new V2(Math.pow(this.x, pow), Math.pow(this.y, pow));
+    };
     V2.prototype.originAngle = function (lowerBound) {
         if (lowerBound === void 0) { lowerBound = 0; }
         return (Math.atan2(this.y, this.x) + 2 * Math.PI) % (2 * Math.PI) + lowerBound;
     };
+    V2.prototype.minOriginAngle = function () {
+        var originAngle = this.originAngle();
+        return Math.min(Math.abs(originAngle), Math.abs(originAngle - 2 * Math.PI));
+    };
     V2.prototype.angleBetween = function (v2) {
         var angleOne = this.originAngle();
         var angleTwo = v2.originAngle();
-        return Math.min((angleOne - angleTwo) % (2 * Math.PI), (angleTwo - angleOne) % (2 * Math.PI));
+        return angleTwo - angleOne;
+    };
+    V2.prototype.minAngleBetween = function (v2) {
+        var angleBetween = this.angleBetween(v2);
+        return Math.min(Math.abs(angleBetween), Math.abs(angleBetween - 2 * Math.PI));
     };
     V2.prototype.dot = function () {
         var arg = [];

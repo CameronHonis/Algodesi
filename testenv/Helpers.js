@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-var V2_1 = require("./models/V2");
+var V2_1 = require("./V2");
 var Helpers = /** @class */ (function () {
     function Helpers() {
     }
@@ -89,6 +89,34 @@ var Helpers = /** @class */ (function () {
     };
     Helpers.toScreenSize = function (screenSize, size) {
         return new V2_1.V2(size.x / window.innerWidth * screenSize.x, size.y / window.innerHeight * screenSize.y);
+    };
+    Helpers.rad = function (deg) {
+        return deg / 180 * Math.PI;
+    };
+    Helpers.deg = function (rad) {
+        return rad * 180 / Math.PI;
+    };
+    Helpers.snapAngle = function (angle, lowerBound) {
+        if (lowerBound === void 0) { lowerBound = 0; }
+        angle = ((angle - lowerBound) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        return angle + lowerBound;
+    };
+    Helpers.deepCopy = function (obj, rtnObj) {
+        if (rtnObj === void 0) { rtnObj = {}; }
+        if (typeof obj !== "object") {
+            return obj;
+        }
+        for (var _i = 0, _a = Object.entries(obj); _i < _a.length; _i++) {
+            var _b = _a[_i], key = _b[0], val = _b[1];
+            if (typeof val !== "object") {
+                rtnObj[key] = val;
+            }
+            else {
+                rtnObj[key] = {};
+                this.deepCopy(val, rtnObj[key]);
+            }
+        }
+        return rtnObj;
     };
     return Helpers;
 }());

@@ -1,20 +1,23 @@
-import React, { useEffect } from "react";
+import React from "react";
+import { V2 } from "./models/V2";
 import { Window } from "./Window";
 
 export interface Refs {
   keysDown: Set<string | number>;
+  mousePos: V2,
+  mouseDownPos: V2 | null;
 };
 
 export const initRefs: Refs = {
   keysDown: new Set(),
+  mousePos: new V2(0, 0),
+  mouseDownPos: null,
 };
 
 export interface State {
-
 };
 
 export const initState: State = {
-
 };
 
 export interface AppContextType {
@@ -52,19 +55,24 @@ export const App: React.FC = () => {
     keysUpdated();
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     document.addEventListener("keydown", e => { 
       setKeyRefs(e.key);
     });
     document.addEventListener("mousedown", e => {
       setKeyRefs(e.button);
+      refs.mouseDownPos = new V2(e.clientX, e.clientY);
     });
     document.addEventListener("keyup", e => {
       setKeyRefs(e.key, false);
     });
     document.addEventListener("mouseup", e => {
       setKeyRefs(e.button, false);
+      refs.mouseDownPos = null;
     });
+    document.addEventListener("mousemove", e => {
+      refs.mousePos = new V2(e.clientX, e.clientY);
+    })
   }, []); //eslint-disable-line
   return (
     <div className="App">

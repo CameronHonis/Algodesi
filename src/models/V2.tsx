@@ -69,14 +69,32 @@ export class V2 {
     return new V2(Math.sign(this.x), Math.sign(this.y));
   }
 
+  abs(): V2 {
+    return new V2(Math.abs(this.x), Math.abs(this.y));
+  }
+
+  pow(pow: number): V2 {
+    return new V2(Math.pow(this.x, pow), Math.pow(this.y, pow));
+  }
+
   originAngle(lowerBound: number = 0): number { // counter-clockwise angle between vector and positive x-axis above the lower bound
     return (Math.atan2(this.y, this.x) + 2*Math.PI) % (2*Math.PI) + lowerBound;
+  }
+
+  minOriginAngle(): number { //min angle between vector and positive x-axis
+    const originAngle: number = this.originAngle();
+    return Math.min(Math.abs(originAngle), Math.abs(originAngle - 2*Math.PI));
   }
 
   angleBetween(v2: V2) {
     const angleOne: number = this.originAngle();
     const angleTwo: number = v2.originAngle();
-    return Math.min((angleOne - angleTwo) % (2*Math.PI), (angleTwo - angleOne) % (2*Math.PI));
+    return angleTwo - angleOne;
+  }
+
+  minAngleBetween(v2: V2) {
+    const angleBetween: number = this.angleBetween(v2);
+    return Math.min(Math.abs(angleBetween), Math.abs(angleBetween - 2*Math.PI));
   }
 
   dot(v2: V2): number

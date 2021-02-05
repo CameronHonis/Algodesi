@@ -1,10 +1,18 @@
+import { Node } from "./Node";
 
-let nextId: number = 0
+export enum DSType {
+  BST = "BST",
+}
+
+let nextId: number = 0;
+
 export abstract class DS {
   public readonly id: number;
-  public isGhost: boolean = true;
+  public readonly type: DSType;
+  public nodes: {[index: number]: Node} = {};
   
-  constructor() {
+  constructor(type: DSType) {
     this.id = nextId++;
+    this.type = type;
   }
 }
