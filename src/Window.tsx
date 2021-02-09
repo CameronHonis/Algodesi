@@ -11,7 +11,7 @@ import Helpers from "./models/Helpers";
 import { NodeComp, Refs as NodeRefs, NodeRefsAction } from "./components/NodeComp";
 import { EdgeComp, Refs as EdgeRefs, EdgeRefsAction } from "./components/EdgeComp";
 import { ContextWindow, Refs as ContextWindowRefs, RefsAction as ContextWindowRefsAction } from "./components/ContextWindow";
-//import SelectionBar from './components/SelectionBar'
+import SelectionBar from './components/SelectionBar'
 
 type ForceTypeKeys = keyof typeof ForceType;
 
@@ -649,7 +649,7 @@ export const Window: React.FC = () => {
       <div id="ghostEdgeComps">
         {ghostEdgeComps}
       </div>
-      {/* <SelectionBar/> */}
+      <SelectionBar/>
       <ContextWindow windowRefs={refs}/>
     </div>
   )
