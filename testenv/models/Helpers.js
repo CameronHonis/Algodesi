@@ -85,10 +85,10 @@ var Helpers = /** @class */ (function () {
         return new V2_1.V2(pos.x / window.innerWidth * screenSize.x - screenSize.x / 2 + screenPos.x, (1 - pos.y / window.innerHeight) * screenSize.y - screenSize.y / 2 + screenPos.y);
     };
     Helpers.toPixelSize = function (screenSize, size) {
-        return new V2_1.V2(size.x / screenSize.x * window.innerWidth, size.y / screenSize.y * window.innerHeight);
+        return new V2_1.V2(size.x / screenSize.x * window.innerWidth, -size.y / screenSize.y * window.innerHeight);
     };
     Helpers.toScreenSize = function (screenSize, size) {
-        return new V2_1.V2(size.x / window.innerWidth * screenSize.x, size.y / window.innerHeight * screenSize.y);
+        return new V2_1.V2(size.x / window.innerWidth * screenSize.x, -size.y / window.innerHeight * screenSize.y);
     };
     Helpers.rad = function (deg) {
         return deg / 180 * Math.PI;
@@ -117,6 +117,36 @@ var Helpers = /** @class */ (function () {
             }
         }
         return rtnObj;
+    };
+    Helpers.shallowArrayCompare = function (arr1, arr2) {
+        if (arr1.length !== arr2.length) {
+            return false;
+        }
+        for (var i = 0; i < arr1.length; ++i) {
+            if (arr1[i] !== arr2[i]) {
+                return false;
+            }
+        }
+        return true;
+    };
+    Helpers.listTypes = function (arr) {
+        var rtn = "";
+        for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
+            var v = arr_1[_i];
+            if (rtn.length) {
+                rtn += ", ";
+            }
+            if (v) {
+                rtn += v.constructor.name;
+            }
+            else if (v === null) {
+                rtn += "null";
+            }
+            else {
+                rtn += "undefined";
+            }
+        }
+        return rtn;
     };
     return Helpers;
 }());

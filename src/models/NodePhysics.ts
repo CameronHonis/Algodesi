@@ -3,38 +3,14 @@ import { V2 } from "./V2";
 import { M2 } from "./M2";
 import Helpers from "./Helpers";
 import { BST } from "./BST";
-
-export const PHYSICS_SPEED: number = 1;
-export const MAX_DT: number = .2;
-export const MAX_SPEED: number = 10;
-export const PRIORITY_RANGE: number = 5;
-
-export const MAX_REPULSIVE_FORCE: number = 80;
-export const REPULSIVE_COEFF: number = 10;
-export const REPULSIVE_OFFSET: number = -2.5;
-
-export const DRAG_COEFF: number = 3;
-export const STATIC_FRIC_COEFF: number = 5;
-
-export const BOND_BASE_LENGTH: number = 2;
-export const BOND_LENGTH_COEFF: number = 400;
-export const BOND_LENGTH_POW: number = 2;
-export const BOND_ANGLE: number = 30;
-export const BOND_ANGLE_COEFF: number = 80;
-
-export enum ForceType {
-  REPULSIVE,
-  DRAG,
-  BOND_ANGLE,
-  BOND_LENGTH
-}
+import * as ENV from "../envVars";
 
 export class NodePhysics {
   public node: Node;
   public pos: V2;
   public velo: V2 = new V2(0, 0);
   public accel: V2 = new V2(0, 0);
-  public forces: [V2, ForceType][] = [];
+  public forces: [V2, ENV.ForceType, Node?][] = [];
   public mass: number = 1;
   public anchored: boolean = false;
   public highPriorityRelations: Set<NodePhysics> = new Set();
@@ -59,7 +35,7 @@ export class NodePhysics {
           return true;
         }
         if (predPath.r0.equals(predPath.r1) && predPath2.r0.equals(predPath2.r1)) {
-          if (predPath.r0.add(predPath2.r0.scale(-1)).magnitude() < PRIORITY_RANGE) {
+          if (predPath.r0.add(predPath2.r0.scale(-1)).magnitude() < ENV.PRIORITY_RANGE) {
             return true;
           }
         } else if (predPath.r0.equals(predPath.r1)) {
@@ -100,13 +76,12 @@ export class NodePhysics {
     }
     const addRepulsiveForce = (): void => {
       const dis: number = this.pos.add(that.pos.scale(-1)).magnitude();
-      const force: number = Math.max(0,Math.min(REPULSIVE_COEFF*Math.pow(1/dis, 2) + REPULSIVE_OFFSET, MAX_REPULSIVE_FORCE));
+      const force: number = Math.max(0,Math.min(ENV.NODE_REPULSIVE_COEFF*Math.pow(1/dis, 2) + ENV.NODE_REPULSIVE_OFFSET, ENV.NODE_MAX_REPULSIVE_FORCE));
       const thisForce: V2 = this.pos.add(that.pos.scale(-1)).unit().scale(force)
       const thatForce: V2 = that.pos.add(this.pos.scale(-1)).unit().scale(force)
-      this.forces.push([thisForce, ForceType.REPULSIVE]);
-      that.forces.push([thatForce, ForceType.REPULSIVE]);
-    }
-    addRepulsiveForce();
+      this.forces.push([thisForce, ENV.ForceType.REPULSIVE, that.node]);
+      that.forces.push([thatForce, ENV.ForceType.REPULSIVE, this.node]);
+    }; addRepulsiveForce();
     const addBondForce = (): void => {
       if (!this.node.ds || this.node.ds !== that.node.ds) { return; }
       let parent: NodePhysics | undefined = undefined;
@@ -156,13 +131,13 @@ export class NodePhysics {
           targAngle += bondAngle;
         }
         let angleDiff: number = Helpers.snapAngle(targAngle - currBond.originAngle(), -Math.PI);
-        const bondAngleForce: V2 = new V2(currBond.y, -currBond.x).unit().scale(bondStrength*BOND_ANGLE_COEFF*-angleDiff);
-        child.forces.push([bondAngleForce, ForceType.BOND_ANGLE]);
-        parent.forces.push([bondAngleForce.scale(-1), ForceType.BOND_ANGLE]);
+        const bondAngleForce: V2 = new V2(currBond.y, -currBond.x).unit().scale(bondStrength*ENV.BOND_ANGLE_COEFF*-angleDiff);
+        child.forces.push([bondAngleForce, ENV.ForceType.BOND_ANGLE, parent.node]);
+        parent.forces.push([bondAngleForce.scale(-1), ENV.ForceType.BOND_ANGLE, child.node]);
         const bondLengthDiff: number = currBond.magnitude() - bondLength;
-        const bondLengthForce: V2 = currBond.unit().scale(bondStrength*BOND_LENGTH_COEFF*Math.sign(bondLengthDiff)*Math.abs(Math.pow(bondLengthDiff, BOND_LENGTH_POW)));
-        parent.forces.push([bondLengthForce, ForceType.BOND_LENGTH]);
-        child.forces.push([bondLengthForce.scale(-1), ForceType.BOND_LENGTH]);
+        const bondLengthForce: V2 = currBond.unit().scale(bondStrength*ENV.BOND_LENGTH_COEFF*Math.sign(bondLengthDiff)*Math.abs(Math.pow(bondLengthDiff, ENV.BOND_LENGTH_POW)));
+        parent.forces.push([bondLengthForce, ENV.ForceType.BOND_LENGTH, child.node]);
+        child.forces.push([bondLengthForce.scale(-1), ENV.ForceType.BOND_LENGTH, parent.node]);
       }
     }
     addBondForce();
@@ -170,9 +145,9 @@ export class NodePhysics {
 
   addDrag(): void {
     if (this.velo.magnitude() < 1) {
-      this.forces.push([this.velo.scale(-DRAG_COEFF), ForceType.DRAG]);
+      this.forces.push([this.velo.scale(-ENV.NODE_DRAG_COEFF), ENV.ForceType.DRAG]);
     } else {
-      this.forces.push([this.velo.pow(2).abs().parallelProduct(this.velo.sign().scale(-DRAG_COEFF)), ForceType.DRAG]);
+      this.forces.push([this.velo.pow(2).abs().parallelProduct(this.velo.sign().scale(-ENV.NODE_DRAG_COEFF)), ENV.ForceType.DRAG]);
     }
   }
 
@@ -180,22 +155,22 @@ export class NodePhysics {
     this.forces = [];
   }
 
-  incrementPhysics(dt: number): void {
-    dt = Math.min(dt, MAX_DT);
+  incrementPhysics(dt: number, physicsSpeed: number = ENV.PHYSICS_SPEED): void {
+    dt = Math.min(dt, ENV.MAX_DT);
     let netForce: V2 = new V2(0, 0);
     for (const [ force ] of this.forces) {
       netForce = netForce.add(force);
     }
-    if (this.anchored || (this.velo.magnitude() < .01 && netForce.magnitude() < STATIC_FRIC_COEFF)) {
+    if (this.anchored || (this.velo.magnitude() < .01 && netForce.magnitude() < ENV.NODE_STATIC_FRIC_COEFF)) {
       this.accel = new V2(0, 0);
       this.velo = new V2(0, 0);
     } else {
       this.accel = netForce.scale(1/this.mass);
     }
-    this.velo = this.velo.add(this.accel.scale(dt*PHYSICS_SPEED));
-    if (this.velo.magnitude() > MAX_SPEED) {
-      this.velo = this.velo.scale(MAX_SPEED/this.velo.magnitude());
+    this.velo = this.velo.add(this.accel.scale(dt*physicsSpeed));
+    if (this.velo.magnitude() > ENV.MAX_SPEED) {
+      this.velo = this.velo.scale(ENV.MAX_SPEED/this.velo.magnitude());
     }
-    this.pos = this.pos.add(this.velo.scale(dt*PHYSICS_SPEED));
+    this.pos = this.pos.add(this.velo.scale(dt*physicsSpeed));
   }
 }

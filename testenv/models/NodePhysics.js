@@ -1,30 +1,10 @@
 "use strict";
 exports.__esModule = true;
-exports.NodePhysics = exports.ForceType = exports.BOND_ANGLE_COEFF = exports.BOND_ANGLE = exports.BOND_LENGTH_POW = exports.BOND_LENGTH_COEFF = exports.BOND_BASE_LENGTH = exports.STATIC_FRIC_COEFF = exports.DRAG_COEFF = exports.REPULSIVE_OFFSET = exports.REPULSIVE_COEFF = exports.MAX_REPULSIVE_FORCE = exports.PRIORITY_RANGE = exports.MAX_SPEED = exports.MAX_DT = exports.PHYSICS_SPEED = void 0;
+exports.NodePhysics = void 0;
 var V2_1 = require("./V2");
 var M2_1 = require("./M2");
 var Helpers_1 = require("./Helpers");
-exports.PHYSICS_SPEED = 1;
-exports.MAX_DT = .2;
-exports.MAX_SPEED = 10;
-exports.PRIORITY_RANGE = 5;
-exports.MAX_REPULSIVE_FORCE = 80;
-exports.REPULSIVE_COEFF = 10;
-exports.REPULSIVE_OFFSET = -2.5;
-exports.DRAG_COEFF = 3;
-exports.STATIC_FRIC_COEFF = 5;
-exports.BOND_BASE_LENGTH = 2;
-exports.BOND_LENGTH_COEFF = 400;
-exports.BOND_LENGTH_POW = 2;
-exports.BOND_ANGLE = 30;
-exports.BOND_ANGLE_COEFF = 80;
-var ForceType;
-(function (ForceType) {
-    ForceType[ForceType["REPULSIVE"] = 0] = "REPULSIVE";
-    ForceType[ForceType["DRAG"] = 1] = "DRAG";
-    ForceType[ForceType["BOND_ANGLE"] = 2] = "BOND_ANGLE";
-    ForceType[ForceType["BOND_LENGTH"] = 3] = "BOND_LENGTH";
-})(ForceType = exports.ForceType || (exports.ForceType = {}));
+var ENV = require("../envVars");
 var NodePhysics = /** @class */ (function () {
     function NodePhysics(node, pos) {
         this.velo = new V2_1.V2(0, 0);
@@ -54,7 +34,7 @@ var NodePhysics = /** @class */ (function () {
                     return true;
                 }
                 if (predPath.r0.equals(predPath.r1) && predPath2.r0.equals(predPath2.r1)) {
-                    if (predPath.r0.add(predPath2.r0.scale(-1)).magnitude() < exports.PRIORITY_RANGE) {
+                    if (predPath.r0.add(predPath2.r0.scale(-1)).magnitude() < ENV.PRIORITY_RANGE) {
                         return true;
                     }
                 }
@@ -102,11 +82,11 @@ var NodePhysics = /** @class */ (function () {
         }
         var addRepulsiveForce = function () {
             var dis = _this.pos.add(that.pos.scale(-1)).magnitude();
-            var force = Math.max(0, Math.min(exports.REPULSIVE_COEFF * Math.pow(1 / dis, 2) + exports.REPULSIVE_OFFSET, exports.MAX_REPULSIVE_FORCE));
+            var force = Math.max(0, Math.min(ENV.NODE_REPULSIVE_COEFF * Math.pow(1 / dis, 2) + ENV.NODE_REPULSIVE_OFFSET, ENV.NODE_MAX_REPULSIVE_FORCE));
             var thisForce = _this.pos.add(that.pos.scale(-1)).unit().scale(force);
             var thatForce = that.pos.add(_this.pos.scale(-1)).unit().scale(force);
-            _this.forces.push([thisForce, ForceType.REPULSIVE]);
-            that.forces.push([thatForce, ForceType.REPULSIVE]);
+            _this.forces.push([thisForce, ENV.ForceType.REPULSIVE, that.node]);
+            that.forces.push([thatForce, ENV.ForceType.REPULSIVE, _this.node]);
         };
         addRepulsiveForce();
         var addBondForce = function () {
@@ -172,47 +152,48 @@ var NodePhysics = /** @class */ (function () {
                     targAngle += bondAngle;
                 }
                 var angleDiff = Helpers_1["default"].snapAngle(targAngle - currBond.originAngle(), -Math.PI);
-                var bondAngleForce = new V2_1.V2(currBond.y, -currBond.x).unit().scale(bondStrength * exports.BOND_ANGLE_COEFF * -angleDiff);
-                child.forces.push([bondAngleForce, ForceType.BOND_ANGLE]);
-                parent.forces.push([bondAngleForce.scale(-1), ForceType.BOND_ANGLE]);
+                var bondAngleForce = new V2_1.V2(currBond.y, -currBond.x).unit().scale(bondStrength * ENV.BOND_ANGLE_COEFF * -angleDiff);
+                child.forces.push([bondAngleForce, ENV.ForceType.BOND_ANGLE, parent.node]);
+                parent.forces.push([bondAngleForce.scale(-1), ENV.ForceType.BOND_ANGLE, child.node]);
                 var bondLengthDiff = currBond.magnitude() - bondLength;
-                var bondLengthForce = currBond.unit().scale(bondStrength * exports.BOND_LENGTH_COEFF * Math.sign(bondLengthDiff) * Math.abs(Math.pow(bondLengthDiff, exports.BOND_LENGTH_POW)));
-                parent.forces.push([bondLengthForce, ForceType.BOND_LENGTH]);
-                child.forces.push([bondLengthForce.scale(-1), ForceType.BOND_LENGTH]);
+                var bondLengthForce = currBond.unit().scale(bondStrength * ENV.BOND_LENGTH_COEFF * Math.sign(bondLengthDiff) * Math.abs(Math.pow(bondLengthDiff, ENV.BOND_LENGTH_POW)));
+                parent.forces.push([bondLengthForce, ENV.ForceType.BOND_LENGTH, child.node]);
+                child.forces.push([bondLengthForce.scale(-1), ENV.ForceType.BOND_LENGTH, parent.node]);
             }
         };
         addBondForce();
     };
     NodePhysics.prototype.addDrag = function () {
         if (this.velo.magnitude() < 1) {
-            this.forces.push([this.velo.scale(-exports.DRAG_COEFF), ForceType.DRAG]);
+            this.forces.push([this.velo.scale(-ENV.NODE_DRAG_COEFF), ENV.ForceType.DRAG]);
         }
         else {
-            this.forces.push([this.velo.pow(2).abs().parallelProduct(this.velo.sign().scale(-exports.DRAG_COEFF)), ForceType.DRAG]);
+            this.forces.push([this.velo.pow(2).abs().parallelProduct(this.velo.sign().scale(-ENV.NODE_DRAG_COEFF)), ENV.ForceType.DRAG]);
         }
     };
     NodePhysics.prototype.resetForces = function () {
         this.forces = [];
     };
-    NodePhysics.prototype.incrementPhysics = function (dt) {
-        dt = Math.min(dt, exports.MAX_DT);
+    NodePhysics.prototype.incrementPhysics = function (dt, physicsSpeed) {
+        if (physicsSpeed === void 0) { physicsSpeed = ENV.PHYSICS_SPEED; }
+        dt = Math.min(dt, ENV.MAX_DT);
         var netForce = new V2_1.V2(0, 0);
         for (var _i = 0, _a = this.forces; _i < _a.length; _i++) {
             var force = _a[_i][0];
             netForce = netForce.add(force);
         }
-        if (this.anchored || (this.velo.magnitude() < .01 && netForce.magnitude() < exports.STATIC_FRIC_COEFF)) {
+        if (this.anchored || (this.velo.magnitude() < .01 && netForce.magnitude() < ENV.NODE_STATIC_FRIC_COEFF)) {
             this.accel = new V2_1.V2(0, 0);
             this.velo = new V2_1.V2(0, 0);
         }
         else {
             this.accel = netForce.scale(1 / this.mass);
         }
-        this.velo = this.velo.add(this.accel.scale(dt * exports.PHYSICS_SPEED));
-        if (this.velo.magnitude() > exports.MAX_SPEED) {
-            this.velo = this.velo.scale(exports.MAX_SPEED / this.velo.magnitude());
+        this.velo = this.velo.add(this.accel.scale(dt * physicsSpeed));
+        if (this.velo.magnitude() > ENV.MAX_SPEED) {
+            this.velo = this.velo.scale(ENV.MAX_SPEED / this.velo.magnitude());
         }
-        this.pos = this.pos.add(this.velo.scale(dt * exports.PHYSICS_SPEED));
+        this.pos = this.pos.add(this.velo.scale(dt * physicsSpeed));
     };
     return NodePhysics;
 }());

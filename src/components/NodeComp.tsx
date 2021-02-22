@@ -3,14 +3,15 @@ import gsap from "gsap";
 import { Node } from "../models/Node";
 import { Refs as WindowRefs, RefsAction as WindowRefsAction } from "../Window";
 import { AppContext, AppContextType } from "../App";
+import { ContextAction } from "./MainContext";
 import { DSType } from "../models/DS";
-import { EdgeRefsAction } from "./EdgeComp";
 import Helpers from "../models/Helpers";
+import { getBSTContextActions } from "./BSTComp";
 
 interface Props {
   node: Node
   windowRefs: WindowRefs;
-  setWindowRefs: (action: WindowRefsAction, arg: any) => any;
+  setWindowRefs: (action: WindowRefsAction, ...args: any) => any;
   isGhost?: Boolean;
 }
 
@@ -48,6 +49,29 @@ export enum NodeRefsAction {
   UPDATE_HIGHLIGHTED = "UPDATE_HIGHLIGHTED",
 }
 
+export const getNodeContextActions = (windowRefs: WindowRefs, node?: Node): ContextAction[] => {
+  if (!node) {
+    if (windowRefs.interacts.selectAnchor) {
+      node = windowRefs.interacts.selectAnchor;
+    } else {
+      return [];
+    }
+  }
+  const rtn: ContextAction[] = [];
+  if (Helpers.shallowArrayCompare(windowRefs.ui.tree, [0])) {
+    rtn.push({
+      name: "set value", 
+      callback: (e: React.MouseEvent | KeyboardEvent, refs: WindowRefs, setRefs: (action: WindowRefsAction, ...args: any) => void) => {
+        setRefs(WindowRefsAction.SET_UI_TREE, [0, 0]);
+      }
+    });
+  }
+  if (node.ds && node.ds.type === DSType.BST) {
+    getBSTContextActions(windowRefs, node).forEach(v => rtn.push(v));
+  }
+  return rtn;
+}
+
 export const NodeComp: React.FC<Props> = ({node, isGhost, windowRefs, setWindowRefs}) => {
   let { state: appState, setState: setAppState, refs: appRefs } = React.useContext<AppContextType>(AppContext); //eslint-disable-line
 
@@ -72,111 +96,75 @@ export const NodeComp: React.FC<Props> = ({node, isGhost, windowRefs, setWindowR
           setRefs(NodeRefsAction.SET_SHIFT_DOWN, false);
         } else if (e.key === "Control") {
           setRefs(NodeRefsAction.SET_CTRL_DOWN, false);
-        } else if ((e.key === "t" || e.key === "T") && node.id === 15 && false) {
-          console.log("mouseOver: " + refs.inputs.mouseOver);
-          console.log("shiftDown: " + refs.inputs.shiftDown);
-          console.log("ctrlDown: " + refs.inputs.ctrlDown);
         }
       });
     }
   },[]); //eslint-disable-line
   
-  const setRefs = (action: NodeRefsAction, ...arg: any): void => {
+  const setRefs = (action: NodeRefsAction, ...args: any): void => {
     if (isGhost) { return; }
     const updateHighlighted = () => {
       if (!refs.interacts.selected && (refs.inputs.mouseOver || windowRefs.interacts.clamped === node)) {
+        setAllRefs(NodeRefsAction.SET_HIGHLIGHTED, false);
         if (refs.inputs.ctrlDown) {
-          setAllRefs(NodeRefsAction.SET_HIGHLIGHTED, false);
           setRefs(NodeRefsAction.SET_HIGHLIGHTED, true);
         } else if (refs.inputs.shiftDown) {
-          setAllRefs(NodeRefsAction.SET_HIGHLIGHTED, false);
           setChildRefs(NodeRefsAction.SET_HIGHLIGHTED, true);
         } else {
-          setAllRefs(NodeRefsAction.SET_HIGHLIGHTED, true);
+          setDSRefs(NodeRefsAction.SET_HIGHLIGHTED, true);
         }
       } else {
         setAllRefs(NodeRefsAction.SET_HIGHLIGHTED, false);
       }
     }
-    const setEdges = (top: EdgeRefsAction, bottom: EdgeRefsAction, val: boolean) => {
-      if (node.parent && node.parent.id + "-" + node.id in windowRefs.edges && windowRefs.edges[node.parent.id + "-" + node.id].compSetRefs) {
-        windowRefs.edges[node.parent.id + "-" + node.id].compSetRefs!(bottom, val);
-      }
-      if (node.left && node.id + "-" + node.left.id in windowRefs.edges && windowRefs.edges[node.id + "-" + node.left.id].compSetRefs) {
-        windowRefs.edges[node.id + "-" + node.left.id].compSetRefs!(top, val);
-      }
-      if (node.right && node.id + "-" + node.right.id in windowRefs.edges && windowRefs.edges[node.id + "-" + node.right.id].compSetRefs) {
-        windowRefs.edges[node.id + "-" + node.right.id].compSetRefs!(top, val);
-      }
-    }
-    const refsCopy = {interacts: {...refs.interacts}, inputs: {...refs.inputs}};
-    if (action === NodeRefsAction.SET_MOUSE_OVER && typeof arg[0] === "boolean") {
-      if (arg[0] === refs.inputs.mouseOver) { return; }
-      refs.inputs.mouseOver = arg[0];
+    if (action === NodeRefsAction.SET_MOUSE_OVER && typeof args[0] === "boolean") {
+      if (args[0] === refs.inputs.mouseOver) { return; }
+      refs.inputs.mouseOver = args[0];
       if (!windowRefs.interacts.clamped) {
         updateHighlighted();
       }
-    } else if (action === NodeRefsAction.SET_CTRL_DOWN && typeof arg[0] === "boolean") {
-      if (arg[0] === refs.inputs.ctrlDown) { return; }
-      refs.inputs.ctrlDown = arg[0];
+    } else if (action === NodeRefsAction.SET_CTRL_DOWN && typeof args[0] === "boolean") {
+      if (args[0] === refs.inputs.ctrlDown) { return; }
+      refs.inputs.ctrlDown = args[0];
       if (refs.inputs.mouseOver) {
         updateHighlighted();
       }
-    } else if (action === NodeRefsAction.SET_SHIFT_DOWN && typeof arg[0] === "boolean") {
-      if (arg[0] === refs.inputs.shiftDown) { return; }
-      refs.inputs.shiftDown = arg[0];
+    } else if (action === NodeRefsAction.SET_SHIFT_DOWN && typeof args[0] === "boolean") {
+      if (args[0] === refs.inputs.shiftDown) { return; }
+      refs.inputs.shiftDown = args[0];
       if (refs.inputs.mouseOver) {
         updateHighlighted();
       }
-    } else if (action === NodeRefsAction.SET_SELECTED && typeof arg[0] === "boolean") {
-      refs.interacts.selected = arg[0];
-      setEdges(EdgeRefsAction.SET_SELECTED_TOP, EdgeRefsAction.SET_SELECTED_BOTTOM, arg[0]);
+    } else if (action === NodeRefsAction.SET_SELECTED && typeof args[0] === "boolean") {
+      refs.interacts.selected = args[0];
       render();
-    } else if (action === NodeRefsAction.SET_HIGHLIGHTED && typeof arg[0] === "boolean") {
-      refs.interacts.highlighted = arg[0];
-      setEdges(EdgeRefsAction.SET_HIGHLIGHTED_TOP, EdgeRefsAction.SET_HIGHLIGHTED_BOTTOM, arg[0]);
+    } else if (action === NodeRefsAction.SET_HIGHLIGHTED && typeof args[0] === "boolean") {
+      refs.interacts.highlighted = args[0];
       render();
     } else if (action === NodeRefsAction.PRINT) {
       console.log(node.toString(), refs.inputs.mouseOver);
     } else if (action === NodeRefsAction.UPDATE_HIGHLIGHTED) {
       updateHighlighted();
     }
-    if (node.id === 15 && false) {
-      console.group("NodeRefsChange: ");
-      if (refs.inputs.mouseOver !== refsCopy.inputs.mouseOver) {
-        console.log("mouseOver: " + refs.inputs.mouseOver);
-      }
-      if (refs.inputs.shiftDown !== refsCopy.inputs.shiftDown) {
-        console.log("shiftDown: " + refs.inputs.shiftDown);
-      }
-      if (refs.inputs.ctrlDown !== refsCopy.inputs.ctrlDown) {
-        console.log("ctrlDown: " + refs.inputs.ctrlDown);
-      }
-      if (refs.interacts.highlighted !== refsCopy.interacts.highlighted) {
-        console.log("highlighted: " + refs.interacts.highlighted);
-      }
-      if (refs.interacts.selected !== refsCopy.interacts.selected) {
-        console.log("selected: " + refs.interacts.selected);
-      }
-      console.groupEnd();
-    }
-    
   }
 
-  const setAllRefs = (action: NodeRefsAction, ...arg: any): void => {
+  const setAllRefs = (action: NodeRefsAction, ...args: any): void => {
     for (const { compSetRefs } of Object.values(windowRefs.nodes)) {
       if (compSetRefs) {
-        compSetRefs(action, ...arg);
-      }
-    }
-    for (const { compSetRefs } of Object.values(windowRefs.edges)) {
-      if (compSetRefs) {
-        compSetRefs(action, ...arg);
+        compSetRefs(action, ...args);
       }
     }
   }
 
-  const setChildRefs = (action: NodeRefsAction, ...arg: any): void => {
+  const setDSRefs = (action: NodeRefsAction, ...args: any): void => {
+    for (const { node: dsNode, compSetRefs } of Object.values(windowRefs.nodes)) {
+      if ((dsNode === node || (node.ds && node.ds === dsNode.ds)) && compSetRefs) {
+        compSetRefs(action, ...args);
+      }
+    }
+  }
+
+  const setChildRefs = (action: NodeRefsAction, ...args: any): void => {
     const stack: Node[] = [node];
     const stackSet: Set<Node> = new Set();
     while (stack.length) {
@@ -193,13 +181,10 @@ export const NodeComp: React.FC<Props> = ({node, isGhost, windowRefs, setWindowR
         }
       }
       if (stackNode === node) {
-        setRefs(action, ...arg);
+        setRefs(action, ...args);
       } else {
         if (stackNode.id in windowRefs.nodes && windowRefs.nodes[stackNode.id].compSetRefs) {
-          windowRefs.nodes[stackNode.id].compSetRefs!(action, ...arg);
-        }
-        if (stackNode.parent && stackNode.parent.id + "-" + stackNode.id in windowRefs.edges && windowRefs.edges[stackNode.parent.id + "-" + stackNode.id].compSetRefs) {
-          windowRefs.edges[stackNode.parent.id + "-" + stackNode.id].compSetRefs!(action, ...arg);
+          windowRefs.nodes[stackNode.id].compSetRefs!(action, ...args);
         }
       }
       stack.pop();
@@ -224,12 +209,12 @@ export const NodeComp: React.FC<Props> = ({node, isGhost, windowRefs, setWindowR
 
   const mouseDown = (e: React.MouseEvent): void => {
     e.stopPropagation();
-    setWindowRefs(WindowRefsAction.SET_MOUSE_DOWN, [e, node]);
+    setWindowRefs(WindowRefsAction.SET_MOUSE_DOWN, e, node);
   }
   
   const mouseUp = (e: React.MouseEvent): void => {
     e.stopPropagation();
-    setWindowRefs(WindowRefsAction.SET_MOUSE_DOWN, [e, node]);
+    setWindowRefs(WindowRefsAction.SET_MOUSE_DOWN, e, node);
   }
   
   const render = (): void => {
@@ -277,6 +262,7 @@ export const NodeComp: React.FC<Props> = ({node, isGhost, windowRefs, setWindowR
     )
   }
   const zIndex: number = isGhost ? 15 : 5;
+  const pointerEvents: "none" | "auto" = isGhost ? "none" : "auto";
   const ref: React.MutableRefObject<HTMLDivElement> = isGhost ? windowRefs.ghostNodes[node.id].comp : windowRefs.nodes[node.id].comp;
   const onMouseOver: (e: React.MouseEvent) => void = isGhost ? e => undefined : e => mouseOver(e);
   const onMouseMove: (e: React.MouseEvent) => void = isGhost ? e => undefined : e => mouseMove(e);
@@ -287,12 +273,9 @@ export const NodeComp: React.FC<Props> = ({node, isGhost, windowRefs, setWindowR
   const fillColor: string = isGhost ? "rgba(185,185,185,.3)" : "rgb(80,80,80)";
 
   return(
-    <div className={"node"} style={{position: "absolute", width: 0, height: 0, transform: "translate(-50%, -50%)", 
-      WebkitTransform: "translate(-50%, -50%)", zIndex: zIndex}} 
-      ref={ref}
-    >
-      <svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" >
-        <circle cx="50" cy="50" r="47" fill={fillColor} stroke={color} strokeWidth="6" cursor="pointer" 
+    <div className="node" style={{zIndex: zIndex, pointerEvents}} ref={ref}>
+      <svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{pointerEvents}}>
+        <circle cx="50" cy="50" r="47" fill={fillColor} stroke={color} strokeWidth="6" cursor="pointer" style={{pointerEvents}}
           onMouseOver={onMouseOver}
           onMouseMove={onMouseMove}
           onMouseOut={onMouseOut}
@@ -300,13 +283,7 @@ export const NodeComp: React.FC<Props> = ({node, isGhost, windowRefs, setWindowR
           onMouseUp={onMouseUp}
         />
       </svg>
-      <p className="noselect nodeValue"
-        style={{position: "absolute", transform: "translate(-50%, -50%)", WebkitTransform: "translate(-50%, -50%)",
-        left: "50%", top: "50%", color: color, fontFamily: "monospace", textAlign: "center",
-        pointerEvents: "none"}}
-      >
-        {node.value}
-      </p>
+      <p className="noselect nodeValue" style={{color: color}}>{node.value}</p>
       {debugDiv}
     </div>
   );

@@ -88,14 +88,14 @@ export default class Helpers {
   static toPixelSize(screenSize: V2, size: V2): V2 { // converts appState dimension to DOM pix dimension
     return new V2(
       size.x / screenSize.x * window.innerWidth,
-      size.y / screenSize.y * window.innerHeight
+      -size.y / screenSize.y * window.innerHeight
     );
   }
 
   static toScreenSize(screenSize: V2, size: V2): V2 { // converts DOM pix dimension to appState dimension
     return new V2(
       size.x / window.innerWidth * screenSize.x,
-      size.y / window.innerHeight * screenSize.y
+      -size.y / window.innerHeight * screenSize.y
     );
   }
 
@@ -125,5 +125,35 @@ export default class Helpers {
       }
     }
     return rtnObj
+  }
+
+  static shallowArrayCompare(arr1: any[], arr2: any[]): boolean {
+    if (arr1.length !== arr2.length) { return false; }
+    for (let i = 0; i < arr1.length; ++i) {
+      if (arr1[i] !== arr2[i]) { return false; }
+    }
+    return true;
+  }
+
+  static listTypes(arr: any): string {
+    let rtn: string = "";
+    for (let v of arr) {
+      if (rtn.length) {
+        rtn += ", ";
+      }
+      if (v) {
+        rtn += v.constructor.name;
+      } else if (v === null) {
+        rtn += "null";
+      } else {
+        rtn += "undefined";
+      }
+    }
+    return rtn;
+  }
+
+  static rgbaStringToArray(rgbaString: string): [number, number, number, number?] {
+    const rgbaArray: string[] = rgbaString.replace(/[^\d,]/g, '').split(',');
+    return [parseInt(rgbaArray[0]), parseInt(rgbaArray[1]), parseInt(rgbaArray[2]), parseInt(rgbaArray[3])];
   }
 }

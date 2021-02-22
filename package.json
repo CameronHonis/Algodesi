@@ -6,9 +6,6 @@
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.3",
     "@testing-library/user-event": "^12.6.0",
-    "@types/gsap": "^1.20.2",
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
     "gsap": "^3.6.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -20,7 +17,7 @@
     "start": "react-scripts start",
     "start2": "react-scripts start && node browserCLI",
     "start3": "nodemon --exec ts-node src/models/test.ts",
-    "watch": "tsc --watch --outDir testenv",
+    "watch": "tsc -w ./src/models/* --outDir testenv",
     "build": "react-scripts build",
     "eject": "react-scripts eject"
   },
@@ -47,7 +44,12 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.11",
+    "@types/gsap": "^1.20.2",
     "@types/node": "^14.14.22",
+    "@types/react": "^17.0.1",
+    "@types/react-dom": "^17.0.0",
+    "@types/ws": "^7.4.0",
+    "express": "^4.17.1",
     "ts-node": "^9.1.1"
   }
 }
