@@ -33,12 +33,20 @@ const ItemSelection: React.FC<ItemSelectionProps> = (props) => {
         }
     }
   }
-
+  if (refs.current.selected !== 'NONE') {
+    return (
+      <div className='itemSelection' ref={itemSelectRef} onClick={e => {clickHandler(e)}}>
+        <p className='itemSVG'>pic</p>
+        <p className='itemName'>{itemName}</p>
+      </div>
+    )
+  } else {
   return (
     <div className='itemSelection' ref={itemSelectRef} onClick={e => {clickHandler(e)}}>
-      <p>{itemName}</p>
+      <p className='mainItemSVG'>{itemName}</p>
     </div>
   )
+  }
 }
 
 export default ItemSelection

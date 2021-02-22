@@ -206,37 +206,56 @@ body {
 /* SelectionBar vvv */
 
 .itemMenu {
-  /* background-color: black; */
+  background-color: rgb(50,50,50);
   margin: 0;
   position: absolute;
   top: 20px;
   right: 20px;
-  border-radius: 10px;
+  border-radius: 5px;
   overflow: hidden;
   z-index: 500;
-  border: 1px solid grey;
+  border: 1px solid rgb(0, 200, 200);
 }
 
 .itemSelection {
-  border: 1px solid white;
+  border: 1px solid rgb(0, 200, 200);
   display: flex;
   justify-content: center;
   align-items: center;
   height: 50px;
 }
-.itemSelection p {
+.itemSelection > *{
   color: white;
   height: 100%;
   width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
   overflow: hidden;
 }
 
 #selectNone {
   height: 25px;
+  background-color: rgb(0, 200, 200);
 }
+
+#selectNone p {
+  margin: 0 1rem;
+}
+
+.itemSVG {
+  width: calc(50px + 0.5rem);
+  height: 100%;
+  margin-left: 0.5rem;
+}
+
+.itemName {
+  width: calc(85% - 0.5rem);
+}
+
+.mainItemSVG {
+  margin: 0 auto;
+}
+
 /* rgb (0, 200, 200) aqua
 chacoal (50,50,50)
 background-light grey (230,230,230)

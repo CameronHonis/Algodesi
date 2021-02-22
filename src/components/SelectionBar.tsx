@@ -110,12 +110,6 @@ const itemsByGroup: { [key in GroupSelectKeys]: MenuItem[] } = {
         category: GroupSelect.NODE
       },
       {
-        itemName: 'Red-black tree',
-        pos: new V2(50, 50),
-        svg: null,
-        category: GroupSelect.NODE
-      },
-      {
         itemName: 'Splay Tree',
         pos: new V2(50, 50),
         svg: null,

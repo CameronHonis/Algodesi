@@ -8,7 +8,6 @@ import { DSPhysics } from "./models/DSPhysics";
 import { NodePhysics } from "./models/NodePhysics";
 import { NodeComp, Refs as NodeRefs, NodeRefsAction } from "./components/NodeComp";
 import { MainContext, Refs as MainContextRefs, RefsAction as MainContextRefsAction } from "./components/MainContext";
-import { Refs as MainContextItemRefs, RefsAction as MainContextItemRefsAction } from "./components/MainContextItem";
 import { updateTree } from "./services/UITree";
 import { EditNode, Refs as EditNodeRefs, RefsAction as EditNodeRefsAction } from "./components/EditNode";
 import { initializeClocks, physicsStep } from "./services/physics";
