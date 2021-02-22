@@ -1,7 +1,7 @@
 import { Node } from "./Node";
 
 export enum DSType {
-  BST = "BST",
+  "BST",
 }
 
 let nextId: number = 0;

@@ -3,7 +3,7 @@ exports.__esModule = true;
 exports.DS = exports.DSType = void 0;
 var DSType;
 (function (DSType) {
-    DSType["BST"] = "BST";
+    DSType[DSType["BST"] = 0] = "BST";
 })(DSType = exports.DSType || (exports.DSType = {}));
 var nextId = 0;
 var DS = /** @class */ (function () {

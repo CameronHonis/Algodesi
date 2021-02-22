@@ -1,3 +1,5 @@
+import Helpers from "./Helpers";
+
 export class V2 {
   public x: number = 0;
   public y: number = 0;
@@ -24,7 +26,7 @@ export class V2 {
       this.x = arg[0].x;
       this.y = arg[0].y;
     } else {
-      throw new Error("Unhandled parameter types: " + typeof(arg[0]) + (arg[1] ? ", " + typeof(arg[1]) : "") + " for V2.constructor");
+      throw new Error("Error constructing V2, Unhandled parameter types: " + Helpers.listTypes(arg));
     }
   }
 
@@ -103,14 +105,18 @@ export class V2 {
   dot(xy: [number, number]): number
   dot(xy: [string, string]): number
   dot(...arg: any): number {
-    let that: V2;
-    try {
-      that = new V2(arg[0], arg[1]);
-    } catch { 
-      throw new Error ("Error constructing arg[1] V2, unhandled parameter types: " 
-      + typeof(arg[0]) + (arg[1] ? ", " + typeof(arg[1]) : "") + " for V2.dot");
-    }
+    const that: V2 = new V2(arg[0], arg[1]);
     return this.x*that.x + this.y*that.y;
+  }
+
+  cross(v2: V2): number
+  cross(x: number, y: number): number
+  cross(x: string, y: string): number
+  cross(xy: [number, number]): number
+  cross(xy: [string, string]): number
+  cross(...arg: any): number {
+    const that: V2 = new V2(arg[0], arg[1]);
+    return this.x*that.y - this.y*that.x;
   }
 
   parallelProduct(v2: V2): V2
@@ -119,13 +125,7 @@ export class V2 {
   parallelProduct(xy: [number, number]): V2
   parallelProduct(xy: [string, string]): V2
   parallelProduct(...arg: any): V2 { // multiplies vector x's and y's as columns. [a,b].parallelProduct([c,d]) => [ac,bd]
-    let dotV2: V2;
-    try {
-      dotV2 = new V2(arg[0], arg[1]);
-    } catch {
-      throw new Error ("Error constructing arg[1] V2, unhandled parameter types: "
-      + typeof(arg[0]) + (arg[1] ? ", " + typeof(arg[1]) : "") + " for V2.parallelProduct");
-    }
+    const dotV2: V2 = new V2(arg[0], arg[1]);
     return new V2(this.x * dotV2.x, this.y * dotV2.y);
   }
 
@@ -148,13 +148,7 @@ export class V2 {
   equals(xy: [number, number]): boolean
   equals(xy: [string ,string]): boolean
   equals(...arg: any): boolean {
-    let dotV2: V2;
-    try {
-      dotV2 = new V2(arg[0], arg[1]);
-    } catch {
-      throw new Error ("Error constructing arg[1] V2, unhandled parameter types: "
-      + typeof(arg[0]) + (arg[1] ? ", " + typeof(arg[1]) : "") + " for V2.equals");
-    }
+    const dotV2: V2 = new V2(arg[0], arg[1]);
     return this.x === dotV2.x && this.y === dotV2.y;
   }
 
@@ -166,11 +160,11 @@ export class V2 {
     const xRound: number = Math.round(coeff*Math.pow(10, -xPow10)*this.x)/coeff;
     const yRound: number = Math.round(coeff*Math.pow(10, -yPow10)*this.y)/coeff;
     if (sciNotation) {
-      return "[" + xRound + (xPow10 ? "E" + xPow10 : "") + ", " + yRound + (yPow10 ? "E" + yPow10 : "") + "]";
+      return "V2[" + xRound + (xPow10 ? "E" + xPow10 : "") + ", " + yRound + (yPow10 ? "E" + yPow10 : "") + "]";
     } else {
       const xStrSize: number = Math.max(sigFigs + xPow10 + Math.max(-Math.sign(xRound),0), sigFigs - xPow10 + 1 + Math.max(-Math.sign(xRound),0), sigFigs + 1);
       const yStrSize: number = Math.max(sigFigs + yPow10 + Math.max(-Math.sign(yRound),0), sigFigs - yPow10 + 1 + Math.max(-Math.sign(yRound),0), sigFigs + 1);
-      return "[" + (xRound*Math.pow(10, xPow10)).toString().slice(0, xStrSize) 
+      return "V2[" + (xRound*Math.pow(10, xPow10)).toString().slice(0, xStrSize) 
         + ", " + (yRound*Math.pow(10, yPow10)).toString().slice(0, yStrSize) + "]";
     }
   }

@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
 exports.V2 = void 0;
+var Helpers_1 = require("./Helpers");
 var V2 = /** @class */ (function () {
     function V2() {
         var arg = [];
@@ -30,7 +31,7 @@ var V2 = /** @class */ (function () {
             this.y = arg[0].y;
         }
         else {
-            throw new Error("Unhandled parameter types: " + typeof (arg[0]) + (arg[1] ? ", " + typeof (arg[1]) : "") + " for V2.constructor");
+            throw new Error("Error constructing V2, Unhandled parameter types: " + Helpers_1["default"].listTypes(arg));
         }
     }
     V2.prototype.add = function () {
@@ -101,29 +102,23 @@ var V2 = /** @class */ (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             arg[_i] = arguments[_i];
         }
-        var that;
-        try {
-            that = new V2(arg[0], arg[1]);
-        }
-        catch (_a) {
-            throw new Error("Error constructing arg[1] V2, unhandled parameter types: "
-                + typeof (arg[0]) + (arg[1] ? ", " + typeof (arg[1]) : "") + " for V2.dot");
-        }
+        var that = new V2(arg[0], arg[1]);
         return this.x * that.x + this.y * that.y;
+    };
+    V2.prototype.cross = function () {
+        var arg = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            arg[_i] = arguments[_i];
+        }
+        var that = new V2(arg[0], arg[1]);
+        return this.x * that.y - this.y * that.x;
     };
     V2.prototype.parallelProduct = function () {
         var arg = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             arg[_i] = arguments[_i];
         }
-        var dotV2;
-        try {
-            dotV2 = new V2(arg[0], arg[1]);
-        }
-        catch (_a) {
-            throw new Error("Error constructing arg[1] V2, unhandled parameter types: "
-                + typeof (arg[0]) + (arg[1] ? ", " + typeof (arg[1]) : "") + " for V2.parallelProduct");
-        }
+        var dotV2 = new V2(arg[0], arg[1]);
         return new V2(this.x * dotV2.x, this.y * dotV2.y);
     };
     V2.prototype.tween = function (target, c0, c1) {
@@ -143,14 +138,7 @@ var V2 = /** @class */ (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             arg[_i] = arguments[_i];
         }
-        var dotV2;
-        try {
-            dotV2 = new V2(arg[0], arg[1]);
-        }
-        catch (_a) {
-            throw new Error("Error constructing arg[1] V2, unhandled parameter types: "
-                + typeof (arg[0]) + (arg[1] ? ", " + typeof (arg[1]) : "") + " for V2.equals");
-        }
+        var dotV2 = new V2(arg[0], arg[1]);
         return this.x === dotV2.x && this.y === dotV2.y;
     };
     V2.prototype.toString = function (sigFigs, sciNotation) {
@@ -163,12 +151,12 @@ var V2 = /** @class */ (function () {
         var xRound = Math.round(coeff * Math.pow(10, -xPow10) * this.x) / coeff;
         var yRound = Math.round(coeff * Math.pow(10, -yPow10) * this.y) / coeff;
         if (sciNotation) {
-            return "[" + xRound + (xPow10 ? "E" + xPow10 : "") + ", " + yRound + (yPow10 ? "E" + yPow10 : "") + "]";
+            return "V2[" + xRound + (xPow10 ? "E" + xPow10 : "") + ", " + yRound + (yPow10 ? "E" + yPow10 : "") + "]";
         }
         else {
             var xStrSize = Math.max(sigFigs + xPow10 + Math.max(-Math.sign(xRound), 0), sigFigs - xPow10 + 1 + Math.max(-Math.sign(xRound), 0), sigFigs + 1);
             var yStrSize = Math.max(sigFigs + yPow10 + Math.max(-Math.sign(yRound), 0), sigFigs - yPow10 + 1 + Math.max(-Math.sign(yRound), 0), sigFigs + 1);
-            return "[" + (xRound * Math.pow(10, xPow10)).toString().slice(0, xStrSize)
+            return "V2[" + (xRound * Math.pow(10, xPow10)).toString().slice(0, xStrSize)
                 + ", " + (yRound * Math.pow(10, yPow10)).toString().slice(0, yStrSize) + "]";
         }
     };

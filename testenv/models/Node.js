@@ -186,7 +186,8 @@ var Node = /** @class */ (function () {
             this.addChildrenCount(-removeNode.childrenCount - 1, childCategory);
             this.updateChildrenDepth(childCategory, 0);
             removeNode.parent = null;
-            removeNode.ds = null;
+            removeNode.updateDS(null);
+            //removeNode.ds = null;
             removeNode.updateDepth(0);
             return removeNode;
         }
@@ -196,7 +197,8 @@ var Node = /** @class */ (function () {
                 return null;
             }
             this.children[idx].parent = null;
-            this.children[idx].ds = null;
+            this.updateDS(null);
+            //this.children[idx].ds = null;
             this.children.splice(idx);
             var pointer = this;
             while (pointer) {
@@ -253,35 +255,23 @@ var Node = /** @class */ (function () {
         }
     };
     Node.prototype.updateDS = function (ds) {
+        var oldDS = this.ds;
         this.ds = ds;
-        if (this.ds) {
-            delete this.ds.nodes[this.id];
+        if (oldDS) {
+            delete oldDS.nodes[this.id];
         }
         if (ds) {
             ds.nodes[this.id] = this;
+            if (this.right) {
+                this.right.updateDS(ds);
+            }
+            if (this.left) {
+                this.left.updateDS(ds);
+            }
         }
-        if (this.right) {
-            this.right.updateDS(ds);
-        }
-        if (this.left) {
-            this.left.updateDS(ds);
-        }
-    };
-    Node.prototype.getContextActions = function () {
-        return ([
-            ["nodeTest1", function (e) { return console.log("nodeTest1"); }],
-        ]);
     };
     Node.prototype.compare = function (node) {
-        if (this.value < node.value) {
-            return -1;
-        }
-        else if (this.value > node.value) {
-            return 1;
-        }
-        else {
-            return 0;
-        }
+        return Math.sign(this.value - node.value);
     };
     Node.prototype.toString = function (fields) {
         if (fields === void 0) { fields = ["id", "value"]; }

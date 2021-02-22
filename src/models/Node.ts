@@ -172,7 +172,8 @@ export class Node {
       this.addChildrenCount(-removeNode.childrenCount - 1, childCategory);
       this.updateChildrenDepth(childCategory, 0);
       removeNode.parent = null;
-      removeNode.ds = null;
+      removeNode.updateDS(null);
+      //removeNode.ds = null;
       removeNode.updateDepth(0);
       return removeNode;
     } else if (childCategory === NodeChildCategory.GROUP && node) {
@@ -181,7 +182,8 @@ export class Node {
         return null;
       }
       this.children[idx].parent = null;
-      this.children[idx].ds = null;
+      this.updateDS(null);
+      //this.children[idx].ds = null;
       this.children.splice(idx);
       let pointer: Node | null = this;
       while (pointer) {
@@ -237,35 +239,24 @@ export class Node {
   }
 
   updateDS(ds: DS | null): void {
-      this.ds = ds;
-      if (this.ds) {
-        delete this.ds.nodes[this.id];
-      }
-      if (ds) {
-        ds.nodes[this.id] = this;
-      }
-    if (this.right) {
-      this.right.updateDS(ds);
+    const oldDS: DS | null = this.ds;
+    this.ds = ds;
+    if (oldDS) {
+      delete oldDS.nodes[this.id];
     }
-    if (this.left) {
-      this.left.updateDS(ds);
+    if (ds) {
+      ds.nodes[this.id] = this;
+      if (this.right) {
+        this.right.updateDS(ds);
+      }
+      if (this.left) {
+        this.left.updateDS(ds);
+      }
     }
-  }
-
-  getContextActions(): [string, (e: React.MouseEvent) => void][] {
-    return([
-      ["nodeTest1", (e: React.MouseEvent) => console.log("nodeTest1")],
-    ]);
   }
 
   compare(node: Node): number {
-    if (this.value < node.value) {
-      return -1;
-    } else if (this.value > node.value) {
-      return 1;
-    } else {
-      return 0;
-    }
+    return Math.sign(this.value - node.value);
   }
 
   toString(fields: Array<keyof Node> = ["id", "value"]): string {

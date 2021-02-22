@@ -14,28 +14,28 @@ export class M2 {
   constructor(r0: V2, r1: V2) 
   constructor(m00: number, m01: number, m10: number, m11: number)
   constructor(r0: V2, angle: number, magnitude: number)
-  constructor(...arg: any) {
-    if (arg[0] instanceof V2 && arg[1] instanceof V2) {
-      this.m00 = arg[0].x;
-      this.m01 = arg[0].y;
-      this.m10 = arg[1].x;
-      this.m11 = arg[1].y;
-      this.r0 = arg[0];
-      this.r1 = arg[1];
-    } else if (arg.length === 4 && typeof arg[3] === "number") {
-      this.m00 = arg[0];
-      this.m01 = arg[1];
-      this.m10 = arg[2];
-      this.m11 = arg[3];
-      this.r0 = new V2(arg[0], arg[1]);
-      this.r1 = new V2(arg[2], arg[3]);
-    } else if (arg[0] instanceof V2 && typeof arg[1] === "number" && typeof arg[2] === "number") {
-      const r1: V2 = new V2(arg[0].x + Math.cos(arg[1])*arg[2], arg[0].y + Math.sin(arg[1])*arg[2]);
-      this.m00 = arg[0].x;
-      this.m01 = arg[0].x;
+  constructor(...args: any) {
+    if (args[0] instanceof V2 && args[1] instanceof V2) {
+      this.m00 = args[0].x;
+      this.m01 = args[0].y;
+      this.m10 = args[1].x;
+      this.m11 = args[1].y;
+      this.r0 = args[0];
+      this.r1 = args[1];
+    } else if (args.length === 4 && typeof args[3] === "number") {
+      this.m00 = args[0];
+      this.m01 = args[1];
+      this.m10 = args[2];
+      this.m11 = args[3];
+      this.r0 = new V2(args[0], args[1]);
+      this.r1 = new V2(args[2], args[3]);
+    } else if (args[0] instanceof V2 && typeof args[1] === "number" && typeof args[2] === "number") {
+      const r1: V2 = new V2(args[0].x + Math.cos(args[1])*args[2], args[0].y + Math.sin(args[1])*args[2]);
+      this.m00 = args[0].x;
+      this.m01 = args[0].x;
       this.m10 = r1.x;
       this.m11 = r1.y;
-      this.r0 = arg[0];
+      this.r0 = args[0];
       this.r1 = r1;
     } else {
       throw new Error();
@@ -92,6 +92,10 @@ export class M2 {
     div.style.top = pixR0.y + "px";
     div.style.transform = "matrix(" + Math.cos(angle) + "," + Math.sin(angle) + "," + -Math.sin(angle) + "," + Math.cos(angle) + "," 
       + (Math.cos(angle)-1)*mag/2 + "," + (Math.sin(angle)*mag/2 - thick/2) + ")";
+  }
+
+  collinear(p: V2): boolean {
+    return this.r1.add(this.r0.scale(-1)).cross(p.add(this.r0.scale(-1))) === 0;
   }
 
   matrixString(): string {
